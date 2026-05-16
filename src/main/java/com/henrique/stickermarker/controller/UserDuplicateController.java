@@ -1,39 +1,55 @@
 package com.henrique.stickermarker.controller;
 
-import com.henrique.stickermarker.model.Sticker;
+import com.henrique.stickermarker.dto.UserDuplicateCreateDTO;
+import com.henrique.stickermarker.dto.UserDuplicateDTO;
+import com.henrique.stickermarker.dto.UserDuplicateUpdateDTO;
 import com.henrique.stickermarker.model.User;
-import com.henrique.stickermarker.model.UserDuplicate;
-import com.henrique.stickermarker.service.StickerService;
 import com.henrique.stickermarker.service.UserDuplicateService;
 import com.henrique.stickermarker.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/users/{userId}/duplicates")
+@RequiredArgsConstructor
 public class UserDuplicateController {
 
-    private final UserDuplicateService userDuplicateService;
+    private final UserDuplicateService duplicateService;
     private final UserService userService;
-    private final StickerService stickerService;
 
-    public UserDuplicateController(UserDuplicateService userDuplicateService, UserService userService, StickerService stickerService) {
-        this.userDuplicateService = userDuplicateService;
-        this.userService = userService;
-        this.stickerService = stickerService;
-    }
-
-    @PostMapping("/{stickerId}")
-    public UserDuplicate addDuplicate(@PathVariable Long userId, @PathVariable Long stickerId) {
+    @PostMapping
+    public UserDuplicateDTO createDuplicate(
+            @PathVariable Long userId,
+            @RequestBody UserDuplicateCreateDTO dto
+    ) {
         User user = userService.getById(userId);
-        Sticker sticker = stickerService.getById(stickerId);
-        return userDuplicateService.addDuplicate(user, sticker);
+        return duplicateService.createDuplicate(user, dto);
     }
 
     @GetMapping
-    public List<UserDuplicate> getDuplicates(@PathVariable Long userId) {
+    public List<UserDuplicateDTO> getDuplicates(@PathVariable Long userId) {
         User user = userService.getById(userId);
-        return userDuplicateService.getUserDuplicates(user);
+        return duplicateService.getUserDuplicates(user);
+    }
+
+    @PutMapping("/{stickerCode}")
+    public UserDuplicateDTO updateDuplicate(
+            @PathVariable Long userId,
+            @PathVariable String stickerCode,
+            @RequestBody UserDuplicateUpdateDTO dto
+    ) {
+        User user = userService.getById(userId);
+        return duplicateService.updateDuplicate(user, stickerCode, dto);
+    }
+
+    @DeleteMapping("/{stickerCode}")
+    public void deleteDuplicate(
+            @PathVariable Long userId,
+            @PathVariable String stickerCode
+    ) {
+        User user = userService.getById(userId);
+        duplicateService.deleteDuplicate(user, stickerCode);
     }
 }

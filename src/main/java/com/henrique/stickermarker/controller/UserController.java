@@ -1,33 +1,26 @@
 package com.henrique.stickermarker.controller;
 
-import com.henrique.stickermarker.model.User;
+import com.henrique.stickermarker.dto.UserCreateDTO;
+import com.henrique.stickermarker.dto.UserDTO;
 import com.henrique.stickermarker.service.UserService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
     @PostMapping
-    public User create(@RequestBody User user) {
-        return userService.createUser(user);
-    }
-
-    @GetMapping
-    public List<User> getAll() {
-        return userService.getAllUsers();
+    public UserDTO create(@RequestBody @Valid UserCreateDTO dto) {
+        return userService.createUser(dto);
     }
 
     @GetMapping("/{id}")
-    public User getById(@PathVariable Long id) {
-        return userService.getById(id);
+    public UserDTO getById(@PathVariable Long id) {
+        return userService.getUserDTO(id);
     }
 }

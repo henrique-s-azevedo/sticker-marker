@@ -17,4 +17,7 @@ public class Collection {
 
     @Column(nullable = false)
     private int totalStickers;
+
+    @Column(nullable = false)
+    private int totalPages;
 }

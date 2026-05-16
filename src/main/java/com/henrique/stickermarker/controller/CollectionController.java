@@ -1,33 +1,51 @@
 package com.henrique.stickermarker.controller;
 
-import com.henrique.stickermarker.model.Collection;
+import com.henrique.stickermarker.dto.CollectionCreateDTO;
+import com.henrique.stickermarker.dto.CollectionDTO;
+import com.henrique.stickermarker.dto.CollectionProgressDTO;
+import com.henrique.stickermarker.dto.StickerSummaryDTO;
+import com.henrique.stickermarker.model.User;
 import com.henrique.stickermarker.service.CollectionService;
+import com.henrique.stickermarker.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/collections")
+@RequiredArgsConstructor
 public class CollectionController {
 
     private final CollectionService collectionService;
-
-    public CollectionController(CollectionService collectionService) {
-        this.collectionService = collectionService;
-    }
+    private final UserService userService;
 
     @PostMapping
-    public Collection create(@RequestBody Collection collection) {
-        return collectionService.createCollection(collection);
+    public CollectionDTO create(@RequestBody CollectionCreateDTO dto) {
+        return collectionService.create(dto);
     }
 
     @GetMapping
-    public List<Collection> getAll() {
-        return collectionService.getAllCollections();
+    public List<CollectionDTO> getAll() {
+        return collectionService.getAll();
     }
 
-    @GetMapping("/{id}")
-    public Collection getById(@PathVariable Long id) {
-        return collectionService.getById(id);
+    @GetMapping("/{collectionId}")
+    public CollectionDTO getById(@PathVariable Long collectionId) {
+        return collectionService.getById(collectionId);
+    }
+
+    @GetMapping("/{collectionId}/stickers")
+    public List<StickerSummaryDTO> getStickers(@PathVariable Long collectionId) {
+        return collectionService.getStickersByCollection(collectionId);
+    }
+
+    @GetMapping("/{collectionId}/users/{userId}/progress")
+    public CollectionProgressDTO getProgress(
+            @PathVariable Long collectionId,
+            @PathVariable Long userId
+    ) {
+        User user = userService.getById(userId);
+        return collectionService.getProgress(user, collectionId);
     }
 }

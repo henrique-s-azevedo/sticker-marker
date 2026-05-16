@@ -1,5 +1,6 @@
 package com.henrique.stickermarker.controller;
 
+import com.henrique.stickermarker.dto.CollectionDTO;
 import com.henrique.stickermarker.model.Collection;
 import com.henrique.stickermarker.model.Sticker;
 import com.henrique.stickermarker.service.CollectionService;
@@ -37,7 +38,7 @@ public class StickerController {
 
     @GetMapping("/collection/{collectionId}")
     public List<Sticker> getByCollection(@PathVariable Long collectionId) {
-        Collection collection = collectionService.getById(collectionId);
+        CollectionDTO collection = collectionService.getById(collectionId);
         return stickerService.getByCollection(collection);
     }
 }

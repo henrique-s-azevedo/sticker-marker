@@ -1,6 +1,6 @@
 package com.henrique.stickermarker.service;
 
-import com.henrique.stickermarker.model.Collection;
+import com.henrique.stickermarker.dto.CollectionDTO;
 import com.henrique.stickermarker.model.Sticker;
 import com.henrique.stickermarker.repository.StickerRepository;
 import org.springframework.stereotype.Service;
@@ -25,10 +25,12 @@ public class StickerService {
     }
 
     public Sticker getByCode(String code) {
-        return stickerRepository.findByCode(code);
+        return stickerRepository.findByCode(code)
+                .orElseThrow(() -> new RuntimeException("Sticker not found"));
     }
 
-    public List<Sticker> getByCollection(Collection collection) {
+
+    public List<Sticker> getByCollection(CollectionDTO collection) {
         return stickerRepository.findByCollection(collection);
     }
 
@@ -36,5 +38,4 @@ public class StickerService {
         return stickerRepository.findById(stickerId)
                 .orElseThrow(() -> new RuntimeException("Sticker not found"));
     }
-
 }

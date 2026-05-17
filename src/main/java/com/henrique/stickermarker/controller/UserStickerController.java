@@ -6,12 +6,13 @@ import com.henrique.stickermarker.model.User;
 import com.henrique.stickermarker.service.UserService;
 import com.henrique.stickermarker.service.UserStickerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/users/{userId}/stickers")
+@RequestMapping("/me/stickers")
 @RequiredArgsConstructor
 public class UserStickerController {
 
@@ -19,26 +20,21 @@ public class UserStickerController {
     private final UserService userService;
 
     @PostMapping
-    public UserStickerDTO addSticker(
-            @PathVariable Long userId,
-            @RequestBody UserStickerCreateDTO dto
-    ) {
-        User user = userService.getById(userId);
-        return userStickerService.addStickerToUser(user, dto);
+    public UserStickerDTO addSticker(Authentication authentication, @RequestBody UserStickerCreateDTO dto) {
+        return userStickerService.addStickerToUser(currentUser(authentication), dto);
     }
 
     @GetMapping
-    public List<UserStickerDTO> getUserStickers(@PathVariable Long userId) {
-        User user = userService.getById(userId);
-        return userStickerService.getUserStickers(user);
+    public List<UserStickerDTO> getUserStickers(Authentication authentication) {
+        return userStickerService.getUserStickers(currentUser(authentication));
     }
 
     @DeleteMapping("/{stickerCode}")
-    public void removeSticker(
-            @PathVariable Long userId,
-            @PathVariable String stickerCode
-    ) {
-        User user = userService.getById(userId);
-        userStickerService.removeStickerFromUser(user, stickerCode);
+    public void removeSticker(Authentication authentication, @PathVariable String stickerCode) {
+        userStickerService.removeStickerFromUser(currentUser(authentication), stickerCode);
+    }
+
+    private User currentUser(Authentication authentication) {
+        return userService.getById((Long) authentication.getDetails());
     }
 }

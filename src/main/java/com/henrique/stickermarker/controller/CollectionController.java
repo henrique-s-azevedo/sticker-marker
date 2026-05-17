@@ -8,6 +8,7 @@ import com.henrique.stickermarker.model.User;
 import com.henrique.stickermarker.service.CollectionService;
 import com.henrique.stickermarker.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,12 +41,9 @@ public class CollectionController {
         return collectionService.getStickersByCollection(collectionId);
     }
 
-    @GetMapping("/{collectionId}/users/{userId}/progress")
-    public CollectionProgressDTO getProgress(
-            @PathVariable Long collectionId,
-            @PathVariable Long userId
-    ) {
-        User user = userService.getById(userId);
+    @GetMapping("/{collectionId}/me/progress")
+    public CollectionProgressDTO getProgress(Authentication authentication, @PathVariable Long collectionId) {
+        User user = userService.getById((Long) authentication.getDetails());
         return collectionService.getProgress(user, collectionId);
     }
 }

@@ -7,12 +7,13 @@ import com.henrique.stickermarker.model.User;
 import com.henrique.stickermarker.service.UserDuplicateService;
 import com.henrique.stickermarker.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/users/{userId}/duplicates")
+@RequestMapping("/me/duplicates")
 @RequiredArgsConstructor
 public class UserDuplicateController {
 
@@ -20,36 +21,30 @@ public class UserDuplicateController {
     private final UserService userService;
 
     @PostMapping
-    public UserDuplicateDTO createDuplicate(
-            @PathVariable Long userId,
-            @RequestBody UserDuplicateCreateDTO dto
-    ) {
-        User user = userService.getById(userId);
-        return duplicateService.createDuplicate(user, dto);
+    public UserDuplicateDTO createDuplicate(Authentication authentication, @RequestBody UserDuplicateCreateDTO dto) {
+        return duplicateService.createDuplicate(currentUser(authentication), dto);
     }
 
     @GetMapping
-    public List<UserDuplicateDTO> getDuplicates(@PathVariable Long userId) {
-        User user = userService.getById(userId);
-        return duplicateService.getUserDuplicates(user);
+    public List<UserDuplicateDTO> getDuplicates(Authentication authentication) {
+        return duplicateService.getUserDuplicates(currentUser(authentication));
     }
 
     @PutMapping("/{stickerCode}")
     public UserDuplicateDTO updateDuplicate(
-            @PathVariable Long userId,
+            Authentication authentication,
             @PathVariable String stickerCode,
             @RequestBody UserDuplicateUpdateDTO dto
     ) {
-        User user = userService.getById(userId);
-        return duplicateService.updateDuplicate(user, stickerCode, dto);
+        return duplicateService.updateDuplicate(currentUser(authentication), stickerCode, dto);
     }
 
     @DeleteMapping("/{stickerCode}")
-    public void deleteDuplicate(
-            @PathVariable Long userId,
-            @PathVariable String stickerCode
-    ) {
-        User user = userService.getById(userId);
-        duplicateService.deleteDuplicate(user, stickerCode);
+    public void deleteDuplicate(Authentication authentication, @PathVariable String stickerCode) {
+        duplicateService.deleteDuplicate(currentUser(authentication), stickerCode);
+    }
+
+    private User currentUser(Authentication authentication) {
+        return userService.getById((Long) authentication.getDetails());
     }
 }

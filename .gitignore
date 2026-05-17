@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Claude folder
+.claude/
+
+# Server log
+server.log
+

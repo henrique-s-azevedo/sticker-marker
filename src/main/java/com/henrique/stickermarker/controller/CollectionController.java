@@ -41,6 +41,12 @@ public class CollectionController {
         return collectionService.getStickersByCollection(collectionId);
     }
 
+    @GetMapping("/{collectionId}/me/stickers")
+    public List<CollectionStickerStatusDTO> getStickersWithStatus(Authentication authentication, @PathVariable Long collectionId) {
+        User user = userService.getById((Long) authentication.getDetails());
+        return collectionService.getStickersWithStatus(user, collectionId);
+    }
+
     @GetMapping("/{collectionId}/me/progress")
     public CollectionProgressDTO getProgress(Authentication authentication, @PathVariable Long collectionId) {
         User user = userService.getById((Long) authentication.getDetails());

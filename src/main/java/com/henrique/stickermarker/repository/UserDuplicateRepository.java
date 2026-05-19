@@ -14,4 +14,6 @@ public interface UserDuplicateRepository extends JpaRepository<UserDuplicate, Lo
     List<UserDuplicate> findByUser(User user);
 
     void deleteByUserAndSticker_Code(User user, String code);
+
+    List<UserDuplicate> findByUserAndSticker_Collection_Id(User user, Long collectionId);
 }

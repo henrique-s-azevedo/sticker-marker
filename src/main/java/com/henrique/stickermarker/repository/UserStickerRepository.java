@@ -16,4 +16,6 @@ public interface UserStickerRepository extends JpaRepository<UserSticker, Long> 
     void deleteByUserAndSticker_Code(User user, String code);
 
     long countByUserAndSticker_Collection_Id(User user, Long collectionId);
+
+    List<UserSticker> findByUserAndSticker_Collection_Id(User user, Long collectionId);
 }

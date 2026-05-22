@@ -59,7 +59,8 @@ public class CollectionService {
 
         int total = c.getTotalStickers();
         long owned = userStickerRepository.countByUserAndSticker_Collection_Id(user, collectionId);
-        long duplicates = userDuplicateRepository.findByUserAndSticker_Collection_Id(user, collectionId).size();
+        long duplicates = userDuplicateRepository.findByUserAndSticker_Collection_Id(user, collectionId)
+                .stream().mapToLong(ud -> ud.getQuantity()).sum();
         int missing = total - (int) owned;
         double percentage = total == 0 ? 0.0 : (owned * 100.0) / total;
 

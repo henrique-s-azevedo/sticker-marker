@@ -1,0 +1,29 @@
+const BASE = '/api/auth';
+
+async function request(path, body) {
+  const res = await fetch(`${BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(data.message ?? data.error ?? `Error ${res.status}`);
+  }
+
+  return data;
+}
+
+export function login(email, password) {
+  return request('/login', { email, password });
+}
+
+export function register(displayName, email, password) {
+  return request('/register', { displayName, email, password });
+}
+
+export function refreshTokens(refreshToken) {
+  return request('/refresh', { refreshToken });
+}

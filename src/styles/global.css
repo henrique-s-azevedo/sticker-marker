@@ -1,0 +1,96 @@
+:root {
+  /* Background */
+  --color-bg: #1a1a2e;
+  --color-surface: #22223b;
+  --color-surface-alt: #2a2a42;
+
+  /* Primary */
+  --color-primary: #6c63ff;
+  --color-primary-hover: #574fd6;
+  --color-primary-light: rgba(108, 99, 255, 0.15);
+
+  /* Text */
+  --color-text: #ffffff;
+  --color-text-muted: #8888aa;
+  --color-text-subtle: #555577;
+
+  /* Border & inputs */
+  --color-border: #3a3a5a;
+  --color-input-bg: #2a2a42;
+
+  /* Status */
+  --color-owned: #26a65b;
+  --color-owned-bg: #1a3d2b;
+  --color-missing: #444460;
+  --color-missing-bg: #2a2a3e;
+  --color-duplicate-badge: #ff6b35;
+
+  /* Stats bar */
+  --color-stat-owned: #26c465;
+  --color-stat-missing: #ff5252;
+  --color-stat-duplicate: #4fc3f7;
+  --color-stat-progress: #ffffff;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* Sticker */
+  --sticker-width: 80px;
+  --sticker-height: 108px;
+
+  /* Font */
+  --font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-md: 15px;
+  --font-size-lg: 18px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 32px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+input {
+  font-family: inherit;
+}

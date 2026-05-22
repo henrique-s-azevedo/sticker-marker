@@ -9,6 +9,7 @@ import {
 import StatsBar from '../components/collection/StatsBar';
 import TabBar from '../components/collection/TabBar';
 import StickerSection from '../components/collection/StickerSection';
+import CountrySelect from '../components/common/CountrySelect';
 import './CollectionPage.css';
 
 const COLLECTION_ID = 1;
@@ -16,9 +17,9 @@ const COLLECTION_ID = 1;
 function groupByPrefix(stickers) {
   const groups = {};
   for (const s of stickers) {
-    const prefix = s.code.split(' ')[0];
-    if (!groups[prefix]) groups[prefix] = [];
-    groups[prefix].push(s);
+    const key = s.teamInitial;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(s);
   }
   return groups;
 }
@@ -30,6 +31,7 @@ export default function CollectionPage() {
   const [stickers, setStickers] = useState([]);
   const [progress, setProgress] = useState(null);
   const [activeTab, setActiveTab] = useState('ALL');
+  const [selectedCountries, setSelectedCountries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -52,7 +54,32 @@ export default function CollectionPage() {
     return stickers.filter(s => s.status === activeTab);
   }, [stickers, activeTab]);
 
-  const grouped = useMemo(() => groupByPrefix(filtered), [filtered]);
+  const countryOptions = useMemo(() => {
+    const seen = new Map();
+    for (const s of stickers) {
+      if (!seen.has(s.teamInitial)) seen.set(s.teamInitial, s.teamName);
+    }
+    return [...seen.entries()]
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [stickers]);
+
+  const grouped = useMemo(() => {
+    const byCountry = selectedCountries.length > 0
+      ? filtered.filter(s => selectedCountries.includes(s.teamInitial))
+      : filtered;
+    return groupByPrefix(byCountry);
+  }, [filtered, selectedCountries]);
+
+  function handleCountrySelect(value) {
+    setSelectedCountries(prev =>
+      prev.includes(value) ? prev : [...prev, value]
+    );
+  }
+
+  function handleCountryRemove(value) {
+    setSelectedCountries(prev => prev.filter(v => v !== value));
+  }
 
   const patchSticker = useCallback((code, patch) => {
     setStickers(prev => prev.map(s => s.code === code ? { ...s, ...patch } : s));
@@ -123,6 +150,45 @@ export default function CollectionPage() {
             />
 
             <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
+
+            <div className="collection-page__filters">
+              <div className="collection-page__filters-row">
+                <CountrySelect
+                  options={countryOptions}
+                  value={null}
+                  onChange={handleCountrySelect}
+                  placeholder="Filtrar por país..."
+                />
+                {selectedCountries.length > 0 && (
+                  <button
+                    className="collection-page__reset"
+                    onClick={() => setSelectedCountries([])}
+                  >
+                    Limpar filtros
+                  </button>
+                )}
+              </div>
+
+              {selectedCountries.length > 0 && (
+                <div className="collection-page__tags">
+                  {selectedCountries.map(v => {
+                    const label = countryOptions.find(o => o.value === v)?.label ?? v;
+                    return (
+                      <span key={v} className="collection-page__tag">
+                        {label}
+                        <button
+                          className="collection-page__tag-remove"
+                          onClick={() => handleCountryRemove(v)}
+                          aria-label={`Remover ${label}`}
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             <div className="collection-page__sections">
               {Object.entries(grouped).map(([prefix, items]) => (

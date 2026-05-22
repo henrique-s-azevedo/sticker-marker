@@ -69,11 +69,11 @@
 }
 
 .sticker-card--duplicate {
-  border-color: var(--color-duplicate-badge);
+  border-color: var(--color-owned);
 }
 
 .sticker-card--duplicate .sticker-card__code {
-  background-color: var(--color-duplicate-badge);
+  background-color: var(--color-owned);
 }
 
 /* Overlay backdrop */

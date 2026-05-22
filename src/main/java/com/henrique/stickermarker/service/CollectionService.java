@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,6 +59,7 @@ public class CollectionService {
 
         int total = c.getTotalStickers();
         long owned = userStickerRepository.countByUserAndSticker_Collection_Id(user, collectionId);
+        long duplicates = userDuplicateRepository.findByUserAndSticker_Collection_Id(user, collectionId).size();
         int missing = total - (int) owned;
         double percentage = total == 0 ? 0.0 : (owned * 100.0) / total;
 
@@ -67,6 +69,7 @@ public class CollectionService {
         dto.setTotal(total);
         dto.setOwned(owned);
         dto.setMissing(missing);
+        dto.setDuplicates(duplicates);
         dto.setPercentage(percentage);
 
         return dto;
@@ -83,19 +86,18 @@ public class CollectionService {
                 .map(us -> us.getSticker().getCode())
                 .collect(Collectors.toSet());
 
-        Set<String> duplicateCodes = userDuplicateRepository
+        Map<String, Integer> duplicateQuantities = userDuplicateRepository
                 .findByUserAndSticker_Collection_Id(user, collectionId)
                 .stream()
-                .map(ud -> ud.getSticker().getCode())
-                .collect(Collectors.toSet());
+                .collect(Collectors.toMap(ud -> ud.getSticker().getCode(), ud -> ud.getQuantity()));
 
         return stickerRepository.findByCollection_Id(collectionId)
                 .stream()
-                .map(s -> toStatusDTO(s, ownedCodes, duplicateCodes))
+                .map(s -> toStatusDTO(s, ownedCodes, duplicateQuantities))
                 .toList();
     }
 
-    private CollectionStickerStatusDTO toStatusDTO(Sticker s, Set<String> ownedCodes, Set<String> duplicateCodes) {
+    private CollectionStickerStatusDTO toStatusDTO(Sticker s, Set<String> ownedCodes, Map<String, Integer> duplicateQuantities) {
         CollectionStickerStatusDTO dto = new CollectionStickerStatusDTO();
         dto.setId(s.getId());
         dto.setCode(s.getCode());
@@ -105,8 +107,9 @@ public class CollectionService {
         dto.setTeamInitial(s.getTeamInitial());
         dto.setPageNumber(s.getPageNumber());
 
-        if (duplicateCodes.contains(s.getCode())) {
+        if (duplicateQuantities.containsKey(s.getCode())) {
             dto.setStatus(StickerStatus.DUPLICATE);
+            dto.setDuplicateQuantity(duplicateQuantities.get(s.getCode()));
         } else if (ownedCodes.contains(s.getCode())) {
             dto.setStatus(StickerStatus.OWNED);
         } else {

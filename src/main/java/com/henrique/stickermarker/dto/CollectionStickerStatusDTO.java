@@ -12,4 +12,5 @@ public class CollectionStickerStatusDTO {
     private String teamInitial;
     private int pageNumber;
     private StickerStatus status;
+    private int duplicateQuantity;
 }

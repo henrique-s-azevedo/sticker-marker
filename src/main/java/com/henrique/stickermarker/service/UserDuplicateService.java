@@ -9,6 +9,7 @@ import com.henrique.stickermarker.model.UserDuplicate;
 import com.henrique.stickermarker.repository.UserDuplicateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -71,6 +72,7 @@ public class UserDuplicateService {
                 .toList();
     }
 
+    @Transactional
     public void deleteDuplicate(User user, String code) {
         duplicateRepository.deleteByUserAndSticker_Code(user, code);
     }

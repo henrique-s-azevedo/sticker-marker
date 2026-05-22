@@ -8,6 +8,7 @@ import com.henrique.stickermarker.model.UserSticker;
 import com.henrique.stickermarker.repository.UserStickerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -45,6 +46,7 @@ public class UserStickerService {
                 .toList();
     }
 
+    @Transactional
     public void removeStickerFromUser(User user, String stickerCode) {
         userStickerRepository.deleteByUserAndSticker_Code(user, stickerCode);
     }

@@ -11,5 +11,6 @@ public class CollectionProgressDTO {
     private int total;
     private long owned;
     private int missing;
+    private long duplicates;
     private double percentage;
 }

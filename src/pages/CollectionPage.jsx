@@ -10,6 +10,8 @@ import StatsBar from '../components/collection/StatsBar';
 import TabBar from '../components/collection/TabBar';
 import StickerSection from '../components/collection/StickerSection';
 import CountrySelect from '../components/common/CountrySelect';
+import SortDropdown from '../components/common/SortDropdown';
+import StickerSearch from '../components/common/StickerSearch';
 import './CollectionPage.css';
 
 const COLLECTION_ID = 1;
@@ -32,6 +34,8 @@ export default function CollectionPage() {
   const [progress, setProgress] = useState(null);
   const [activeTab, setActiveTab] = useState('ALL');
   const [selectedCountries, setSelectedCountries] = useState([]);
+  const [sortOrder, setSortOrder] = useState('ALBUM');
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -64,12 +68,43 @@ export default function CollectionPage() {
       .sort((a, b) => a.label.localeCompare(b.label));
   }, [stickers]);
 
-  const grouped = useMemo(() => {
-    const byCountry = selectedCountries.length > 0
-      ? filtered.filter(s => selectedCountries.includes(s.teamInitial))
+  const sortedSections = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    let base = q
+      ? filtered.filter(s => s.code.toLowerCase().includes(q))
       : filtered;
-    return groupByPrefix(byCountry);
-  }, [filtered, selectedCountries]);
+
+    if (selectedCountries.length > 0) {
+      base = base.filter(s => selectedCountries.includes(s.teamInitial));
+    }
+
+    const entries = Object.entries(groupByPrefix(base));
+
+    if (sortOrder === 'AZ') {
+      return entries.sort(([, a], [, b]) =>
+        a[0].teamName.localeCompare(b[0].teamName)
+      );
+    }
+    if (sortOrder === 'ZA') {
+      return entries.sort(([, a], [, b]) =>
+        b[0].teamName.localeCompare(a[0].teamName)
+      );
+    }
+    if (sortOrder === 'MOST_COMPLETE' || sortOrder === 'LEAST_COMPLETE') {
+      const pct = group => {
+        const owned = group.filter(s => s.status === 'OWNED' || s.status === 'DUPLICATE').length;
+        return group.length > 0 ? owned / group.length : 0;
+      };
+      return entries.sort(([, a], [, b]) =>
+        sortOrder === 'MOST_COMPLETE' ? pct(b) - pct(a) : pct(a) - pct(b)
+      );
+    }
+    return entries.sort(([, a], [, b]) => {
+      const minA = Math.min(...a.map(s => s.pageNumber));
+      const minB = Math.min(...b.map(s => s.pageNumber));
+      return minA - minB;
+    });
+  }, [filtered, searchQuery, selectedCountries, sortOrder]);
 
   function handleCountrySelect(value) {
     setSelectedCountries(prev =>
@@ -152,13 +187,18 @@ export default function CollectionPage() {
             <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
             <div className="collection-page__filters">
+              <StickerSearch value={searchQuery} onChange={setSearchQuery} />
+
               <div className="collection-page__filters-row">
-                <CountrySelect
-                  options={countryOptions}
-                  value={null}
-                  onChange={handleCountrySelect}
-                  placeholder="Filtrar por país..."
-                />
+                <SortDropdown value={sortOrder} onChange={setSortOrder} />
+                <div className="collection-page__country-wrap">
+                  <CountrySelect
+                    options={countryOptions}
+                    value={null}
+                    onChange={handleCountrySelect}
+                    placeholder="Filtrar por país..."
+                  />
+                </div>
                 {selectedCountries.length > 0 && (
                   <button
                     className="collection-page__reset"
@@ -191,7 +231,7 @@ export default function CollectionPage() {
             </div>
 
             <div className="collection-page__sections">
-              {Object.entries(grouped).map(([prefix, items]) => (
+              {sortedSections.map(([prefix, items]) => (
                 <StickerSection
                   key={prefix}
                   prefix={prefix}
@@ -199,7 +239,7 @@ export default function CollectionPage() {
                   onSave={handleSave}
                 />
               ))}
-              {Object.keys(grouped).length === 0 && (
+              {sortedSections.length === 0 && (
                 <p className="collection-page__empty">Nenhum cromo nesta aba.</p>
               )}
             </div>

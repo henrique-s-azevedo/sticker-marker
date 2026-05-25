@@ -1,0 +1,32 @@
+.stats-bar {
+  display: flex;
+  gap: var(--spacing-md);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.stats-bar__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.stats-bar__value {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.stats-bar__label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.stats-bar__item--owned .stats-bar__value   { color: var(--color-stat-owned); }
+.stats-bar__item--missing .stats-bar__value  { color: var(--color-stat-missing); }
+.stats-bar__item--duplicate .stats-bar__value { color: var(--color-stat-duplicate); }
+.stats-bar__item--progress .stats-bar__value  { color: var(--color-stat-progress); }

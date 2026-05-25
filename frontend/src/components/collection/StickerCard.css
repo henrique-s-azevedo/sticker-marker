@@ -1,0 +1,148 @@
+.sticker-card {
+  position: relative;
+  width: var(--sticker-width);
+  height: var(--sticker-height);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 2px solid transparent;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sticker-card--open {
+  z-index: 101;
+}
+
+.sticker-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.sticker-card__code {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  text-align: center;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: #ffffff;
+  background-color: rgba(0, 0, 0, 0.55);
+  padding: 3px 4px;
+  line-height: 1.3;
+}
+
+.sticker-card__badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 2;
+  background-color: var(--color-duplicate-badge);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* Status styles */
+.sticker-card--owned {
+  border-color: var(--color-owned);
+}
+
+.sticker-card--owned .sticker-card__code {
+  background-color: var(--color-owned);
+}
+
+.sticker-card--missing {
+  border-color: var(--color-missing);
+  opacity: 0.6;
+}
+
+.sticker-card--duplicate {
+  border-color: var(--color-owned);
+}
+
+.sticker-card--duplicate .sticker-card__code {
+  background-color: var(--color-owned);
+}
+
+/* Overlay backdrop */
+.sticker-overlay__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+/* Overlay cortina */
+.sticker-card__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 102;
+  background: rgba(10, 10, 20, 0.88);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  border-radius: calc(var(--radius-sm) - 2px);
+}
+
+.sticker-card__overlay-counter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sticker-card__overlay-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 700;
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+}
+
+.sticker-card__overlay-btn:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.sticker-card__overlay-qty {
+  min-width: 22px;
+  text-align: center;
+  font-weight: 700;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+}
+
+.sticker-card__overlay-save {
+  font-size: 10px;
+  padding: 4px 12px;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  border: none;
+}
+
+.sticker-card__overlay-save:hover {
+  background: var(--color-primary-hover);
+}

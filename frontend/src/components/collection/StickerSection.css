@@ -1,0 +1,34 @@
+.sticker-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.sticker-section__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sticker-section__flag {
+  font-size: var(--font-size-lg);
+}
+
+.sticker-section__name {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  flex: 1;
+}
+
+.sticker-section__progress {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-stat-owned);
+}
+
+.sticker-section__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}

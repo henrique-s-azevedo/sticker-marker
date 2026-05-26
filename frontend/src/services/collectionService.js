@@ -1,9 +1,9 @@
 import { getAccessToken } from '../context/AuthContext';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? '';
+const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
 
 async function request(path, { method = 'GET', body } = {}) {
-  const res = await fetch(`${API_BASE}/api${path}`, {
+  const res = await fetch(`${API_BASE}${path}`, {
     method,
     headers: {
       Authorization: `Bearer ${getAccessToken()}`,

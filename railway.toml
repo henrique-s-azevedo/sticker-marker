@@ -1,5 +1,5 @@
 [build]
-buildCommand = "cd backend && ./mvnw package -DskipTests"
+buildCommand = "cd backend && sh mvnw package -DskipTests"
 
 [deploy]
 startCommand = "java -jar backend/target/sticker-marker-0.0.1-SNAPSHOT.jar"

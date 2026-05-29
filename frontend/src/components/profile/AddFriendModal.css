@@ -1,0 +1,184 @@
+.add-friend-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: var(--spacing-md);
+}
+
+.add-friend-modal {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.add-friend-modal__close {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: color 0.15s, background 0.15s;
+}
+
+.add-friend-modal__close:hover {
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.add-friend-modal__title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  padding-right: var(--spacing-xl);
+}
+
+.add-friend-modal__modes {
+  display: flex;
+  gap: var(--spacing-xs);
+  background: var(--color-surface-alt);
+  border-radius: var(--radius-md);
+  padding: 4px;
+}
+
+.add-friend-modal__mode-btn {
+  flex: 1;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: color 0.15s, background 0.15s;
+}
+
+.add-friend-modal__mode-btn--active {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.add-friend-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.add-friend-modal__input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-input-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.add-friend-modal__input:focus {
+  border-color: var(--color-primary);
+}
+
+.add-friend-modal__submit {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.add-friend-modal__submit:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.add-friend-modal__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.add-friend-modal__qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.add-friend-modal__qr-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.add-friend-modal__qr-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  width: 100%;
+}
+
+.add-friend-modal__qr-url {
+  flex: 1;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.add-friend-modal__copy-btn {
+  flex-shrink: 0;
+  padding: 4px var(--spacing-sm);
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.add-friend-modal__copy-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+.add-friend-modal__loading {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.add-friend-modal__error {
+  font-size: var(--font-size-sm);
+  color: var(--color-stat-missing);
+}
+
+.add-friend-modal__success {
+  font-size: var(--font-size-sm);
+  color: var(--color-stat-owned);
+}

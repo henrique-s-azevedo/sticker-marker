@@ -8,6 +8,7 @@ import com.henrique.stickermarker.model.RefreshToken;
 import com.henrique.stickermarker.model.User;
 import com.henrique.stickermarker.repository.UserRepository;
 import com.henrique.stickermarker.security.JwtUtil;
+import com.henrique.stickermarker.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +24,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
+    private final UserService userService;
 
     public AuthResponseDTO register(RegisterRequestDTO dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
@@ -33,6 +35,7 @@ public class AuthService {
         user.setDisplayName(dto.getDisplayName());
         user.setEmail(dto.getEmail());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        user.setUserTag(userService.generateUserTag(dto.getEmail()));
         userRepository.save(user);
 
         return buildAuthResponse(user);

@@ -17,6 +17,55 @@
   font-weight: 700;
 }
 
+.collection-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.collection-page__profile-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  padding: 0;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.collection-page__profile-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.collection-page__profile-btn:hover {
+  color: var(--color-text);
+  border-color: var(--color-text-muted);
+}
+
+.collection-page__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--color-stat-missing);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  line-height: 1;
+}
+
 .collection-page__logout {
   background: none;
   border: 1px solid var(--color-border);
@@ -120,6 +169,43 @@
 .collection-page__tag-remove:hover {
   color: var(--color-text);
   background: rgba(255, 255, 255, 0.1);
+}
+
+.collection-page__share-icons {
+  margin-left: auto;
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.collection-page__share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0;
+  color: var(--color-text-muted);
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.collection-page__share-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.collection-page__share-btn:hover {
+  border-color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+}
+
+.collection-page__share-btn--whatsapp:hover {
+  border-color: #25D366;
+  background: rgba(37, 211, 102, 0.1);
 }
 
 .collection-page__sections {

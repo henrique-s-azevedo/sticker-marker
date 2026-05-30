@@ -20,10 +20,16 @@ public class User {
 
     private String displayName;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String userTag;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private CollectionVisibility collectionVisibility = CollectionVisibility.FRIENDS_ONLY;
+
+    @PostLoad
+    private void postLoad() {
+        if (collectionVisibility == null) {
+            collectionVisibility = CollectionVisibility.FRIENDS_ONLY;
+        }
+    }
 }

@@ -10,6 +10,7 @@ import {
   acceptRequest, rejectRequest,
   searchUsers, addFriendByTag,
 } from '../services/friendshipService';
+import { getConversations } from '../services/messageService';
 import AddFriendModal from '../components/profile/AddFriendModal';
 import './ProfilePage.css';
 
@@ -29,6 +30,7 @@ export default function ProfilePage() {
   const [friends, setFriends]         = useState([]);
   const [requests, setRequests]       = useState([]);
   const [sentReqs, setSentReqs]       = useState([]);
+  const [conversations, setConversations] = useState([]);
   const [searchQ, setSearchQ]         = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -38,18 +40,20 @@ export default function ProfilePage() {
   const [saving, setSaving]           = useState(false);
   const [error, setError]             = useState('');
 
-  const loadProfile  = useCallback(() => getProfile().then(setProfile).catch(e => setError(e.message)), []);
-  const loadFriends  = useCallback(() => getFriends().then(setFriends).catch(() => {}), []);
-  const loadRequests = useCallback(() => {
+  const loadProfile       = useCallback(() => getProfile().then(setProfile).catch(e => setError(e.message)), []);
+  const loadFriends       = useCallback(() => getFriends().then(setFriends).catch(() => {}), []);
+  const loadRequests      = useCallback(() => {
     getFriendRequests().then(setRequests).catch(() => {});
     getSentRequests().then(setSentReqs).catch(() => {});
   }, []);
+  const loadConversations = useCallback(() => getConversations().then(setConversations).catch(() => {}), []);
 
   useEffect(() => { loadProfile(); }, [loadProfile]);
   useEffect(() => {
-    if (tab === 'friends')   { loadFriends(); setSearchResults([]); setSearchQ(''); }
-    if (tab === 'requests')  { loadRequests(); }
-  }, [tab, loadFriends, loadRequests]);
+    if (tab === 'friends')       { loadFriends(); setSearchResults([]); setSearchQ(''); }
+    if (tab === 'requests')      { loadRequests(); }
+    if (tab === 'messages')      { loadConversations(); }
+  }, [tab, loadFriends, loadRequests, loadConversations]);
 
   async function handleVisibility(vis) {
     setSaving(true);
@@ -127,6 +131,7 @@ export default function ProfilePage() {
           { id: 'profile',  label: 'Perfil' },
           { id: 'friends',  label: `Amigos${friends.length ? ` (${friends.length})` : ''}` },
           { id: 'requests', label: `Pedidos${profile?.pendingRequestsCount > 0 ? ` · ${profile.pendingRequestsCount}` : ''}` },
+          { id: 'messages', label: `Mensagens${conversations.some(c => c.unreadCount > 0) ? ` · ${conversations.reduce((s, c) => s + c.unreadCount, 0)}` : ''}` },
         ].map(t => (
           <button
             key={t.id}
@@ -253,6 +258,12 @@ export default function ProfilePage() {
                       <span className="profile-page__friend-tag">@{f.userTag}</span>
                     </div>
                     <div className="profile-page__friend-actions">
+                      <button
+                        className="profile-page__btn-secondary"
+                        onClick={() => navigate(`/chat/${f.id}`)}
+                      >
+                        Mensagem
+                      </button>
                       {f.collectionVisibility !== 'PRIVATE' && (
                         <button
                           className="profile-page__btn-secondary"
@@ -309,6 +320,35 @@ export default function ProfilePage() {
                       <span className="profile-page__friend-tag">@{r.addresseeUserTag}</span>
                     </div>
                     <span className="profile-page__pending-badge">Pendente</span>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        )}
+
+        {tab === 'messages' && (
+          <div className="profile-page__section">
+            <div className="profile-page__card">
+              <h3 className="profile-page__card-title">Conversas</h3>
+              {conversations.length === 0
+                ? <p className="profile-page__empty">Ainda não há mensagens. Abre o chat de um amigo.</p>
+                : conversations.map(c => (
+                  <div
+                    key={c.friendId}
+                    className="profile-page__friend-row profile-page__conversation-row"
+                    onClick={() => navigate(`/chat/${c.friendId}`)}
+                  >
+                    <div className="profile-page__friend-avatar">{c.friendDisplayName?.[0]?.toUpperCase()}</div>
+                    <div className="profile-page__friend-info">
+                      <span className="profile-page__friend-name">{c.friendDisplayName}</span>
+                      <span className="profile-page__friend-tag profile-page__last-msg">
+                        {c.lastMessage?.content?.slice(0, 40)}{c.lastMessage?.content?.length > 40 ? '…' : ''}
+                      </span>
+                    </div>
+                    {c.unreadCount > 0 && (
+                      <span className="profile-page__unread-badge">{c.unreadCount}</span>
+                    )}
                   </div>
                 ))
               }

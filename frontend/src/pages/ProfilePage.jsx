@@ -11,6 +11,7 @@ import {
   searchUsers, addFriendByTag,
 } from '../services/friendshipService';
 import { getConversations } from '../services/messageService';
+import TradeOptionsModal from '../components/trade/TradeOptionsModal';
 import AddFriendModal from '../components/profile/AddFriendModal';
 import './ProfilePage.css';
 
@@ -34,6 +35,7 @@ export default function ProfilePage() {
   const [searchQ, setSearchQ]         = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [tradeModalFriend, setTradeModalFriend] = useState(null);
   const [pwForm, setPwForm]           = useState({ current: '', next: '', confirm: '' });
   const [pwError, setPwError]         = useState('');
   const [pwSuccess, setPwSuccess]     = useState('');
@@ -264,6 +266,12 @@ export default function ProfilePage() {
                       >
                         Mensagem
                       </button>
+                      <button
+                        className="profile-page__btn-secondary"
+                        onClick={() => setTradeModalFriend(f)}
+                      >
+                        Ver trocas
+                      </button>
                       {f.collectionVisibility !== 'PRIVATE' && (
                         <button
                           className="profile-page__btn-secondary"
@@ -361,6 +369,13 @@ export default function ProfilePage() {
         <AddFriendModal
           onClose={() => setShowAddModal(false)}
           onSuccess={() => { loadFriends(); loadRequests(); }}
+        />
+      )}
+
+      {tradeModalFriend && (
+        <TradeOptionsModal
+          friend={tradeModalFriend}
+          onClose={() => setTradeModalFriend(null)}
         />
       )}
     </div>

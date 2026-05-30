@@ -8,6 +8,8 @@ import ProfilePage from './pages/ProfilePage';
 import PublicCollectionPage from './pages/PublicCollectionPage';
 import InvitePage from './pages/InvitePage';
 import ChatPage from './pages/ChatPage';
+import TradePage from './pages/TradePage';
+import TradeRespondPage from './pages/TradeRespondPage';
 
 export default function App() {
   return (
@@ -21,6 +23,8 @@ export default function App() {
           <Route path="/collection/:userTag" element={<ProtectedRoute><PublicCollectionPage /></ProtectedRoute>} />
           <Route path="/invite/:code"        element={<ProtectedRoute><InvitePage /></ProtectedRoute>} />
           <Route path="/chat/:friendId"      element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+          <Route path="/trade/:friendId"     element={<ProtectedRoute><TradePage /></ProtectedRoute>} />
+          <Route path="/trade-respond/:tradeId" element={<ProtectedRoute><TradeRespondPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/collection" replace />} />
         </Routes>
       </BrowserRouter>

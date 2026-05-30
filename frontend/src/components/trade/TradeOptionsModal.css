@@ -1,0 +1,150 @@
+.trade-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: var(--spacing-md);
+}
+
+.trade-modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-xl);
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.trade-modal__title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  text-align: center;
+}
+
+.trade-modal__options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.trade-modal__option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.trade-modal__option:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: var(--color-input-bg);
+}
+
+.trade-modal__option--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.trade-modal__option-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.trade-modal__option-title {
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+}
+
+.trade-modal__option-desc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.trade-modal__result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  text-align: center;
+}
+
+.trade-modal__no-trades {
+  padding: var(--spacing-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.trade-modal__trades-found {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.trade-modal__count {
+  font-size: var(--font-size-xl);
+}
+
+.trade-modal__count strong {
+  font-size: 2rem;
+  color: var(--color-primary);
+}
+
+.trade-modal__sub {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.trade-modal__btn-primary {
+  padding: var(--spacing-sm) var(--spacing-xl);
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: var(--spacing-xs);
+}
+
+.trade-modal__btn-back {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.trade-modal__close {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  align-self: center;
+}
+
+.trade-modal__error {
+  color: var(--color-stat-missing);
+  font-size: var(--font-size-xs);
+  text-align: center;
+}
+
+.trade-modal__loading {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  text-align: center;
+}

@@ -7,6 +7,7 @@ import CollectionPage from './pages/CollectionPage';
 import ProfilePage from './pages/ProfilePage';
 import PublicCollectionPage from './pages/PublicCollectionPage';
 import InvitePage from './pages/InvitePage';
+import ChatPage from './pages/ChatPage';
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/profile"    element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="/collection/:userTag" element={<ProtectedRoute><PublicCollectionPage /></ProtectedRoute>} />
           <Route path="/invite/:code"        element={<ProtectedRoute><InvitePage /></ProtectedRoute>} />
+          <Route path="/chat/:friendId"      element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/collection" replace />} />
         </Routes>
       </BrowserRouter>

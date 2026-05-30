@@ -14,6 +14,7 @@ import SortDropdown from '../components/common/SortDropdown';
 import StickerSearch from '../components/common/StickerSearch';
 import ShareModal from '../components/common/ShareModal';
 import { getPendingCount } from '../services/friendshipService';
+import { getUnreadCount } from '../services/messageService';
 import './CollectionPage.css';
 
 const COLLECTION_ID = 1;
@@ -42,9 +43,11 @@ export default function CollectionPage() {
   const [error, setError] = useState(null);
   const [shareMode, setShareMode] = useState(null);
   const [pendingCount, setPendingCount] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
     getPendingCount().then(d => setPendingCount(d?.count ?? 0)).catch(() => {});
+    getUnreadCount().then(d => setUnreadMessages(d?.count ?? 0)).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -179,6 +182,17 @@ export default function CollectionPage() {
           <button
             className="collection-page__profile-btn"
             onClick={() => navigate('/profile')}
+            title="Mensagens"
+            aria-label="Mensagens"
+          >
+            <ChatIcon />
+            {unreadMessages > 0 && (
+              <span className="collection-page__badge">{unreadMessages}</span>
+            )}
+          </button>
+          <button
+            className="collection-page__profile-btn"
+            onClick={() => navigate('/profile')}
             title="Perfil"
             aria-label="Perfil"
           >
@@ -303,6 +317,14 @@ function ProfileIcon() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
       <circle cx="12" cy="7" r="4"/>
+    </svg>
+  );
+}
+
+function ChatIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
     </svg>
   );
 }

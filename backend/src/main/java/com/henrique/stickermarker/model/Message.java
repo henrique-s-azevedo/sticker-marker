@@ -30,8 +30,15 @@ public class Message {
 
     private Instant readAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MessageType messageType = MessageType.CHAT;
+
+    private Long tradeProposalId;
+
     @PrePersist
     void onCreate() {
         sentAt = Instant.now();
+        if (messageType == null) messageType = MessageType.CHAT;
     }
 }

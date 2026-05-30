@@ -4,6 +4,7 @@ import com.henrique.stickermarker.dto.ConversationDTO;
 import com.henrique.stickermarker.dto.MessageDTO;
 import com.henrique.stickermarker.dto.SendMessageDTO;
 import com.henrique.stickermarker.model.Message;
+import com.henrique.stickermarker.model.MessageType;
 import com.henrique.stickermarker.model.User;
 import com.henrique.stickermarker.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +29,19 @@ public class MessageService {
         if (!friendshipService.areFriends(senderId, recipientId)) {
             throw new IllegalArgumentException("Só podes enviar mensagens a amigos");
         }
+        return sendInternal(senderId, recipientId, dto.getContent().trim(), MessageType.CHAT, null);
+    }
+
+    public MessageDTO sendInternal(Long senderId, Long recipientId, String content, MessageType type, Long tradeProposalId) {
         User sender = userService.getById(senderId);
         User recipient = userService.getById(recipientId);
 
         Message msg = new Message();
         msg.setSender(sender);
         msg.setRecipient(recipient);
-        msg.setContent(dto.getContent().trim());
+        msg.setContent(content);
+        msg.setMessageType(type);
+        msg.setTradeProposalId(tradeProposalId);
         return toDTO(messageRepository.save(msg));
     }
 
@@ -98,6 +105,8 @@ public class MessageService {
         dto.setContent(m.getContent());
         dto.setSentAt(m.getSentAt());
         dto.setReadAt(m.getReadAt());
+        dto.setMessageType(m.getMessageType() != null ? m.getMessageType() : MessageType.CHAT);
+        dto.setTradeProposalId(m.getTradeProposalId());
         return dto;
     }
 }

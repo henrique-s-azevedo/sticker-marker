@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getConversation, sendMessage, markRead } from '../services/messageService';
 import { getFriends } from '../services/friendshipService';
+import { confirmTrade, respondTrade, completeTrade } from '../services/tradeService';
 import { getAccessToken } from '../context/AuthContext';
 import './ChatPage.css';
 
@@ -106,6 +107,22 @@ export default function ChatPage() {
         )}
         {messages.map(msg => {
           const mine = msg.senderId === myId;
+          const isTradeMsg = msg.messageType && msg.messageType !== 'CHAT';
+
+          if (isTradeMsg) {
+            return (
+              <TradeMessageCard
+                key={msg.id}
+                msg={msg}
+                mine={mine}
+                myId={myId}
+                formatTime={formatTime}
+                navigate={navigate}
+                onRefresh={load}
+              />
+            );
+          }
+
           return (
             <div key={msg.id} className={`chat-page__bubble-wrap${mine ? ' chat-page__bubble-wrap--mine' : ''}`}>
               <div className={`chat-page__bubble${mine ? ' chat-page__bubble--mine' : ''}`}>
@@ -136,6 +153,97 @@ export default function ChatPage() {
           Enviar
         </button>
       </form>
+    </div>
+  );
+}
+
+function TradeMessageCard({ msg, mine, myId, formatTime, navigate, onRefresh }) {
+  const [acting, setActing] = useState(false);
+  const [err, setErr] = useState('');
+  const type = msg.messageType;
+  const tradeId = msg.tradeProposalId;
+
+  async function act(fn) {
+    setActing(true);
+    setErr('');
+    try {
+      await fn();
+      onRefresh();
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setActing(false);
+    }
+  }
+
+  const isProposal  = type === 'TRADE_PROPOSAL';
+  const isResponse  = type === 'TRADE_RESPONSE';
+  const isConfirmed = type === 'TRADE_CONFIRMED';
+  const isRejected  = type === 'TRADE_REJECTED';
+
+  // Recipient of the message (not the sender) gets action buttons
+  const canActOnProposal  = isProposal  && !mine; // friend gets [Aceitar] [Rejeitar]
+  const canActOnResponse  = isResponse  && !mine; // proposer gets [Confirmar] [Cancelar]
+  const canComplete       = isConfirmed;           // either party can apply trade
+
+  return (
+    <div className="chat-page__trade-wrap">
+      <div className={`chat-page__trade-card${isRejected ? ' chat-page__trade-card--rejected' : ''}${isConfirmed ? ' chat-page__trade-card--confirmed' : ''}`}>
+        <p className="chat-page__trade-content">{msg.content}</p>
+        <span className="chat-page__trade-time">{formatTime(msg.sentAt)}</span>
+
+        {canActOnProposal && (
+          <div className="chat-page__trade-actions">
+            <button
+              className="chat-page__trade-btn chat-page__trade-btn--primary"
+              disabled={acting}
+              onClick={() => navigate(`/trade-respond/${tradeId}`)}
+            >
+              Ver e aceitar
+            </button>
+            <button
+              className="chat-page__trade-btn chat-page__trade-btn--danger"
+              disabled={acting}
+              onClick={() => act(() => respondTrade(tradeId, false, []))}
+            >
+              Rejeitar
+            </button>
+          </div>
+        )}
+
+        {canActOnResponse && (
+          <div className="chat-page__trade-actions">
+            <button
+              className="chat-page__trade-btn chat-page__trade-btn--primary"
+              disabled={acting}
+              onClick={() => act(() => confirmTrade(tradeId, true))}
+            >
+              Confirmar troca
+            </button>
+            <button
+              className="chat-page__trade-btn chat-page__trade-btn--danger"
+              disabled={acting}
+              onClick={() => act(() => confirmTrade(tradeId, false))}
+            >
+              Cancelar
+            </button>
+          </div>
+        )}
+
+        {canComplete && (
+          <div className="chat-page__trade-actions">
+            <button
+              className="chat-page__trade-btn chat-page__trade-btn--complete"
+              disabled={acting}
+              onClick={() => act(() => completeTrade(tradeId))}
+            >
+              {acting ? 'A aplicar...' : 'Marcar como concluída'}
+            </button>
+          </div>
+        )}
+
+        {err && <p className="chat-page__trade-err">{err}</p>}
+      </div>
     </div>
   );
 }

@@ -181,10 +181,12 @@ function TradeMessageCard({ msg, mine, myId, formatTime, navigate, onRefresh }) 
   const isConfirmed = type === 'TRADE_CONFIRMED';
   const isRejected  = type === 'TRADE_REJECTED';
 
-  // Recipient of the message (not the sender) gets action buttons
-  const canActOnProposal  = isProposal  && !mine; // friend gets [Aceitar] [Rejeitar]
-  const canActOnResponse  = isResponse  && !mine; // proposer gets [Confirmar] [Cancelar]
-  const canComplete       = isConfirmed;           // either party can apply trade
+  const tradeStatus = msg.tradeStatus;
+
+  // Buttons only show when the trade is still in the matching actionable state
+  const canActOnProposal  = isProposal  && !mine && tradeStatus === 'PENDING_COUNTERPART';
+  const canActOnResponse  = isResponse  && !mine && tradeStatus === 'PENDING_PROPOSER';
+  const canComplete       = isConfirmed           && tradeStatus === 'CONFIRMED';
 
   return (
     <div className="chat-page__trade-wrap">

@@ -5,8 +5,10 @@ import com.henrique.stickermarker.dto.MessageDTO;
 import com.henrique.stickermarker.dto.SendMessageDTO;
 import com.henrique.stickermarker.model.Message;
 import com.henrique.stickermarker.model.MessageType;
+import com.henrique.stickermarker.model.TradeProposal;
 import com.henrique.stickermarker.model.User;
 import com.henrique.stickermarker.repository.MessageRepository;
+import com.henrique.stickermarker.repository.TradeProposalRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,7 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final UserService userService;
     private final FriendshipService friendshipService;
+    private final TradeProposalRepository tradeProposalRepository;
 
     public MessageDTO send(Long senderId, Long recipientId, SendMessageDTO dto) {
         if (!friendshipService.areFriends(senderId, recipientId)) {
@@ -107,6 +110,10 @@ public class MessageService {
         dto.setReadAt(m.getReadAt());
         dto.setMessageType(m.getMessageType() != null ? m.getMessageType() : MessageType.CHAT);
         dto.setTradeProposalId(m.getTradeProposalId());
+        if (m.getTradeProposalId() != null) {
+            tradeProposalRepository.findById(m.getTradeProposalId())
+                    .ifPresent(trade -> dto.setTradeStatus(trade.getStatus()));
+        }
         return dto;
     }
 }

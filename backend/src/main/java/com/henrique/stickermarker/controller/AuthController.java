@@ -1,6 +1,7 @@
 package com.henrique.stickermarker.controller;
 
 import com.henrique.stickermarker.dto.auth.AuthResponseDTO;
+import com.henrique.stickermarker.dto.auth.GoogleAuthRequestDTO;
 import com.henrique.stickermarker.dto.auth.LoginRequestDTO;
 import com.henrique.stickermarker.dto.auth.RefreshTokenRequestDTO;
 import com.henrique.stickermarker.dto.auth.RegisterRequestDTO;
@@ -29,5 +30,10 @@ public class AuthController {
     @PostMapping("/refresh")
     public AuthResponseDTO refresh(@RequestBody @Valid RefreshTokenRequestDTO dto) {
         return authService.refresh(dto);
+    }
+
+    @PostMapping("/google")
+    public AuthResponseDTO googleLogin(@RequestBody @Valid GoogleAuthRequestDTO dto) {
+        return authService.googleLogin(dto.getIdToken());
     }
 }

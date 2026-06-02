@@ -23,6 +23,9 @@ public class User {
     @Column(unique = true)
     private String userTag;
 
+    @Column(unique = true)
+    private String googleId;
+
     @Enumerated(EnumType.STRING)
     private CollectionVisibility collectionVisibility = CollectionVisibility.FRIENDS_ONLY;
 

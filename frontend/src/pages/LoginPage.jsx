@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../components/auth/AuthLayout';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { login } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
@@ -70,13 +71,8 @@ export default function LoginPage() {
         </div>
 
         <div className="auth-form__social">
-          <Button variant="outline" fullWidth>
-            <img src="https://www.google.com/favicon.ico" width={16} height={16} alt="" />
-            Google
-          </Button>
-          <Button variant="outline" fullWidth>
-            Apple
-          </Button>
+          <GoogleSignInButton onError={setError} />
+          <Button variant="outline" fullWidth disabled>Apple</Button>
         </div>
       </div>
     </AuthLayout>

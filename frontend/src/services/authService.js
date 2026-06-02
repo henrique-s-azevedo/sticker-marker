@@ -27,3 +27,7 @@ export function register(displayName, email, password) {
 export function refreshTokens(refreshToken) {
   return request('/refresh', { refreshToken });
 }
+
+export function googleLogin(idToken) {
+  return request('/google', { idToken });
+}

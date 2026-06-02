@@ -16,6 +16,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUserTag(String userTag);
 
+    Optional<User> findByGoogleId(String googleId);
+
     boolean existsByUserTag(String userTag);
 
     @Query("SELECT u FROM User u WHERE LOWER(u.displayName) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(u.userTag) LIKE LOWER(CONCAT('%', :q, '%'))")

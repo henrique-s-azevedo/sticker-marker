@@ -8,12 +8,14 @@ import com.henrique.stickermarker.model.RefreshToken;
 import com.henrique.stickermarker.model.User;
 import com.henrique.stickermarker.repository.UserRepository;
 import com.henrique.stickermarker.security.JwtUtil;
-import com.henrique.stickermarker.service.UserService;
+import com.henrique.stickermarker.service.GoogleTokenVerifier.GoogleTokenInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +27,7 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
+    private final GoogleTokenVerifier googleTokenVerifier;
 
     public AuthResponseDTO register(RegisterRequestDTO dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
@@ -49,6 +52,29 @@ public class AuthService {
         User user = userRepository.findByEmail(dto.getEmail()).orElseThrow();
 
         // Replace any existing refresh token
+        refreshTokenService.deleteByUser(user);
+        return buildAuthResponse(user);
+    }
+
+    public AuthResponseDTO googleLogin(String idToken) {
+        GoogleTokenInfo info = googleTokenVerifier.verify(idToken);
+
+        User user = userRepository.findByGoogleId(info.sub())
+                .orElseGet(() -> userRepository.findByEmail(info.email())
+                        .map(existing -> {
+                            existing.setGoogleId(info.sub());
+                            return userRepository.save(existing);
+                        })
+                        .orElseGet(() -> {
+                            User newUser = new User();
+                            newUser.setEmail(info.email());
+                            newUser.setDisplayName(info.name() != null ? info.name() : info.email());
+                            newUser.setGoogleId(info.sub());
+                            newUser.setPasswordHash("GOOGLE_" + UUID.randomUUID());
+                            newUser.setUserTag(userService.generateUserTag(info.email()));
+                            return userRepository.save(newUser);
+                        }));
+
         refreshTokenService.deleteByUser(user);
         return buildAuthResponse(user);
     }

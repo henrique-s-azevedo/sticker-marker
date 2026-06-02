@@ -1,6 +1,7 @@
 package com.henrique.stickermarker.dto;
 
 import com.henrique.stickermarker.model.MessageType;
+import com.henrique.stickermarker.model.TradeStatus;
 import lombok.Data;
 
 import java.time.Instant;
@@ -15,4 +16,5 @@ public class MessageDTO {
     private Instant readAt;
     private MessageType messageType;
     private Long tradeProposalId;
+    private TradeStatus tradeStatus;
 }

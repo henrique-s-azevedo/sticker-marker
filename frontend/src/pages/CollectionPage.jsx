@@ -42,6 +42,7 @@ export default function CollectionPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [shareMode, setShareMode] = useState(null);
+  const [quickMode, setQuickMode] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
 
@@ -245,6 +246,18 @@ export default function CollectionPage() {
                 )}
                 <div className="collection-page__share-icons">
                   <button
+                    className={`collection-page__quick-toggle${quickMode ? ' collection-page__quick-toggle--active' : ''}`}
+                    onClick={() => setQuickMode(q => !q)}
+                    title="Quick mode"
+                    aria-label="Quick mode"
+                    aria-pressed={quickMode}
+                  >
+                    <span className="collection-page__quick-track">
+                      <span className="collection-page__quick-thumb" />
+                    </span>
+                    <span className="collection-page__quick-label">Quick</span>
+                  </button>
+                  <button
                     className="collection-page__share-btn collection-page__share-btn--whatsapp"
                     onClick={() => setShareMode('whatsapp')}
                     title="Partilhar no WhatsApp"
@@ -291,6 +304,8 @@ export default function CollectionPage() {
                   prefix={prefix}
                   stickers={items}
                   onSave={handleSave}
+                  quickMode={quickMode}
+                  activeTab={activeTab}
                 />
               ))}
               {sortedSections.length === 0 && (

@@ -217,3 +217,63 @@
   text-align: center;
   padding: var(--spacing-2xl);
 }
+
+/* Quick mode toggle */
+.collection-page__quick-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 10px;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  cursor: pointer;
+}
+
+.collection-page__quick-toggle:hover {
+  border-color: var(--color-text-muted);
+  color: var(--color-text);
+}
+
+.collection-page__quick-toggle--active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.collection-page__quick-track {
+  position: relative;
+  width: 28px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--color-border);
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.collection-page__quick-toggle--active .collection-page__quick-track {
+  background: var(--color-primary);
+}
+
+.collection-page__quick-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+
+.collection-page__quick-toggle--active .collection-page__quick-thumb {
+  transform: translateX(12px);
+}
+
+.collection-page__quick-label {
+  letter-spacing: 0.3px;
+}

@@ -1,7 +1,7 @@
 import StickerCard from './StickerCard';
 import './StickerSection.css';
 
-export default function StickerSection({ prefix, stickers, flagEmoji, onSave }) {
+export default function StickerSection({ prefix, stickers, flagEmoji, onSave, quickMode, activeTab }) {
   const ownedCount = stickers.filter(s => s.status === 'OWNED' || s.status === 'DUPLICATE').length;
   const progress = stickers.length > 0 ? Math.round((ownedCount / stickers.length) * 100) : 0;
 
@@ -20,6 +20,8 @@ export default function StickerSection({ prefix, stickers, flagEmoji, onSave }) 
             status={sticker.status}
             duplicateCount={sticker.duplicateQuantity}
             onSave={delta => onSave?.(sticker, delta)}
+            quickMode={quickMode}
+            activeTab={activeTab}
           />
         ))}
       </div>

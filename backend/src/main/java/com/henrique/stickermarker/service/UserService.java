@@ -5,13 +5,19 @@ import com.henrique.stickermarker.dto.UpdateVisibilityDTO;
 import com.henrique.stickermarker.dto.UserCreateDTO;
 import com.henrique.stickermarker.dto.UserDTO;
 import com.henrique.stickermarker.dto.UserProfileDTO;
+import com.henrique.stickermarker.model.EmailVerificationCode;
 import com.henrique.stickermarker.model.User;
+import com.henrique.stickermarker.repository.EmailVerificationCodeRepository;
 import com.henrique.stickermarker.repository.FriendshipRepository;
 import com.henrique.stickermarker.repository.UserRepository;
 import com.henrique.stickermarker.model.FriendshipStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +26,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final FriendshipRepository friendshipRepository;
+    private final EmailVerificationCodeRepository verificationCodeRepository;
+    private final EmailService emailService;
 
     public UserDTO createUser(UserCreateDTO dto) {
         User user = new User();
@@ -50,6 +58,7 @@ public class UserService {
         dto.setUserTag(user.getUserTag());
         dto.setCollectionVisibility(user.getCollectionVisibility());
         dto.setPendingRequestsCount(pending);
+        dto.setGoogleAccount(user.getGoogleId() != null);
         return dto;
     }
 
@@ -59,11 +68,35 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
+    public void sendPasswordChangeCode(Long userId) {
+        User user = getById(userId);
+        verificationCodeRepository.deleteByUserId(userId);
+        String code = String.format("%06d", new Random().nextInt(1_000_000));
+        EmailVerificationCode vc = new EmailVerificationCode();
+        vc.setUserId(userId);
+        vc.setCode(code);
+        vc.setExpiresAt(LocalDateTime.now().plusMinutes(15));
+        vc.setCreatedAt(LocalDateTime.now());
+        vc.setUsed(false);
+        verificationCodeRepository.save(vc);
+        emailService.sendPasswordChangeCode(user.getEmail(), code);
+    }
+
+    @Transactional
     public void changePassword(Long userId, ChangePasswordDTO dto) {
         User user = getById(userId);
         if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPasswordHash())) {
-            throw new IllegalArgumentException("Password atual incorreta");
+            throw new IllegalArgumentException("Current password is incorrect");
         }
+        EmailVerificationCode vc = verificationCodeRepository
+                .findTopByUserIdAndUsedFalseAndExpiresAtAfterOrderByCreatedAtDesc(userId, LocalDateTime.now())
+                .orElseThrow(() -> new IllegalArgumentException("Verification code is invalid or has expired"));
+        if (!vc.getCode().equals(dto.getVerificationCode())) {
+            throw new IllegalArgumentException("Verification code is incorrect");
+        }
+        vc.setUsed(true);
+        verificationCodeRepository.save(vc);
         user.setPasswordHash(passwordEncoder.encode(dto.getNewPassword()));
         userRepository.save(user);
     }
@@ -91,4 +124,3 @@ public class UserService {
         return dto;
     }
 }
-

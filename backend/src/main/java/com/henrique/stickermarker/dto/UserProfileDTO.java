@@ -11,4 +11,5 @@ public class UserProfileDTO {
     private String userTag;
     private CollectionVisibility collectionVisibility;
     private long pendingRequestsCount;
+    private boolean googleAccount;
 }

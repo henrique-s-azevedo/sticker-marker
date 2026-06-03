@@ -17,7 +17,8 @@ async function request(path, { method = 'GET', body } = {}) {
   return data;
 }
 
-export const getProfile         = ()                     => request('/me/profile');
-export const updateVisibility   = (visibility)           => request('/me/collection/visibility', { method: 'PUT', body: { visibility } });
-export const changePassword     = (currentPassword, newPassword) => request('/me/change-password', { method: 'POST', body: { currentPassword, newPassword } });
-export const getMyInvite        = ()                     => request('/me/invite');
+export const getProfile               = ()                                          => request('/me/profile');
+export const updateVisibility         = (visibility)                                 => request('/me/collection/visibility', { method: 'PUT', body: { visibility } });
+export const sendPasswordChangeCode   = ()                                           => request('/me/change-password/send-code', { method: 'POST' });
+export const changePassword           = (currentPassword, newPassword, verificationCode) => request('/me/change-password', { method: 'POST', body: { currentPassword, newPassword, verificationCode } });
+export const getMyInvite              = ()                                           => request('/me/invite');

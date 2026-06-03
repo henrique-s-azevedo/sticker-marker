@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -21,26 +21,26 @@ const VISIBILITY_LABELS = {
   PRIVATE:      'Privada',
 };
 
-const COLLECTION_ID = 1;
-
 export default function ProfilePage() {
   const navigate  = useNavigate();
   const { logout } = useAuth();
-  const [tab, setTab]                 = useState('profile');
-  const [profile, setProfile]         = useState(null);
-  const [friends, setFriends]         = useState([]);
-  const [requests, setRequests]       = useState([]);
-  const [sentReqs, setSentReqs]       = useState([]);
+  const [tab, setTab]                   = useState('profile');
+  const [profile, setProfile]           = useState(null);
+  const [friends, setFriends]           = useState([]);
+  const [requests, setRequests]         = useState([]);
+  const [sentReqs, setSentReqs]         = useState([]);
   const [conversations, setConversations] = useState([]);
-  const [searchQ, setSearchQ]         = useState('');
+  const [searchQ, setSearchQ]           = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [friendsFilterQ, setFriendsFilterQ] = useState('');
+  const [msgsFilterQ, setMsgsFilterQ]   = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [tradeModalFriend, setTradeModalFriend] = useState(null);
-  const [pwForm, setPwForm]           = useState({ current: '', next: '', confirm: '' });
-  const [pwError, setPwError]         = useState('');
-  const [pwSuccess, setPwSuccess]     = useState('');
-  const [saving, setSaving]           = useState(false);
-  const [error, setError]             = useState('');
+  const [pwForm, setPwForm]             = useState({ current: '', next: '', confirm: '' });
+  const [pwError, setPwError]           = useState('');
+  const [pwSuccess, setPwSuccess]       = useState('');
+  const [saving, setSaving]             = useState(false);
+  const [error, setError]               = useState('');
 
   const loadProfile       = useCallback(() => getProfile().then(setProfile).catch(e => setError(e.message)), []);
   const loadFriends       = useCallback(() => getFriends().then(setFriends).catch(() => {}), []);
@@ -52,10 +52,24 @@ export default function ProfilePage() {
 
   useEffect(() => { loadProfile(); }, [loadProfile]);
   useEffect(() => {
-    if (tab === 'friends')       { loadFriends(); setSearchResults([]); setSearchQ(''); }
-    if (tab === 'requests')      { loadRequests(); }
-    if (tab === 'messages')      { loadConversations(); }
+    if (tab === 'friends')  { loadFriends(); setFriendsFilterQ(''); }
+    if (tab === 'requests') { loadRequests(); setSearchQ(''); setSearchResults([]); }
+    if (tab === 'messages') { loadConversations(); setMsgsFilterQ(''); }
   }, [tab, loadFriends, loadRequests, loadConversations]);
+
+  const filteredFriends = useMemo(() => {
+    const q = friendsFilterQ.trim().toLowerCase();
+    if (!q) return friends;
+    return friends.filter(f =>
+      f.displayName?.toLowerCase().includes(q) || f.userTag?.toLowerCase().includes(q)
+    );
+  }, [friends, friendsFilterQ]);
+
+  const filteredConversations = useMemo(() => {
+    const q = msgsFilterQ.trim().toLowerCase();
+    if (!q) return conversations;
+    return conversations.filter(c => c.friendDisplayName?.toLowerCase().includes(q));
+  }, [conversations, msgsFilterQ]);
 
   async function handleVisibility(vis) {
     setSaving(true);
@@ -223,36 +237,21 @@ export default function ProfilePage() {
 
         {tab === 'friends' && (
           <div className="profile-page__section">
-            <div className="profile-page__friends-header">
-              <input
-                className="profile-page__search"
-                type="text"
-                placeholder="Pesquisar utilizadores (@tag ou nome)..."
-                value={searchQ}
-                onChange={handleSearch}
-              />
-              <button className="profile-page__btn-primary" onClick={() => setShowAddModal(true)}>
-                + Adicionar Amigo
-              </button>
-            </div>
-
-            {searchQ.trim().length >= 2 && (
-              <div className="profile-page__card">
-                <h3 className="profile-page__card-title">Resultados</h3>
-                {searchResults.length === 0
-                  ? <p className="profile-page__empty">Nenhum utilizador encontrado.</p>
-                  : searchResults.map(u => (
-                    <UserSearchRow key={u.id} user={u} onRequestSent={loadRequests} />
-                  ))
-                }
-              </div>
-            )}
+            <input
+              className="profile-page__search"
+              type="text"
+              placeholder="Filtrar amigos..."
+              value={friendsFilterQ}
+              onChange={e => setFriendsFilterQ(e.target.value)}
+            />
 
             <div className="profile-page__card">
-              <h3 className="profile-page__card-title">Os teus amigos ({friends.length})</h3>
-              {friends.length === 0
-                ? <p className="profile-page__empty">Ainda não tens amigos adicionados.</p>
-                : friends.map(f => (
+              <h3 className="profile-page__card-title">Os teus amigos ({filteredFriends.length})</h3>
+              {filteredFriends.length === 0
+                ? <p className="profile-page__empty">
+                    {friendsFilterQ ? 'Nenhum amigo encontrado.' : 'Ainda não tens amigos adicionados.'}
+                  </p>
+                : filteredFriends.map(f => (
                   <div key={f.id} className="profile-page__friend-row">
                     <div className="profile-page__friend-avatar">{f.displayName?.[0]?.toUpperCase()}</div>
                     <div className="profile-page__friend-info">
@@ -296,6 +295,31 @@ export default function ProfilePage() {
 
         {tab === 'requests' && (
           <div className="profile-page__section">
+            <div className="profile-page__friends-header">
+              <input
+                className="profile-page__search"
+                type="text"
+                placeholder="Pesquisar utilizadores (@tag ou nome)..."
+                value={searchQ}
+                onChange={handleSearch}
+              />
+              <button className="profile-page__btn-primary" onClick={() => setShowAddModal(true)}>
+                + Adicionar Amigo
+              </button>
+            </div>
+
+            {searchQ.trim().length >= 2 && (
+              <div className="profile-page__card">
+                <h3 className="profile-page__card-title">Resultados</h3>
+                {searchResults.length === 0
+                  ? <p className="profile-page__empty">Nenhum utilizador encontrado.</p>
+                  : searchResults.map(u => (
+                    <UserSearchRow key={u.id} user={u} onRequestSent={loadRequests} />
+                  ))
+                }
+              </div>
+            )}
+
             <div className="profile-page__card">
               <h3 className="profile-page__card-title">Pedidos recebidos ({requests.length})</h3>
               {requests.length === 0
@@ -337,11 +361,20 @@ export default function ProfilePage() {
 
         {tab === 'messages' && (
           <div className="profile-page__section">
+            <input
+              className="profile-page__search"
+              type="text"
+              placeholder="Filtrar conversas..."
+              value={msgsFilterQ}
+              onChange={e => setMsgsFilterQ(e.target.value)}
+            />
             <div className="profile-page__card">
               <h3 className="profile-page__card-title">Conversas</h3>
-              {conversations.length === 0
-                ? <p className="profile-page__empty">Ainda não há mensagens. Abre o chat de um amigo.</p>
-                : conversations.map(c => (
+              {filteredConversations.length === 0
+                ? <p className="profile-page__empty">
+                    {msgsFilterQ ? 'Nenhuma conversa encontrada.' : 'Ainda não há mensagens. Abre o chat de um amigo.'}
+                  </p>
+                : filteredConversations.map(c => (
                   <div
                     key={c.friendId}
                     className="profile-page__friend-row profile-page__conversation-row"

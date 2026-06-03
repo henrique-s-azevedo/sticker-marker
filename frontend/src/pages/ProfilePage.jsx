@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
-  getProfile, updateVisibility, changePassword,
+  getProfile, updateVisibility, changePassword, sendPasswordChangeCode,
 } from '../services/profileService';
 import {
   getFriends, removeFriend,
@@ -36,7 +36,9 @@ export default function ProfilePage() {
   const [msgsFilterQ, setMsgsFilterQ]   = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [tradeModalFriend, setTradeModalFriend] = useState(null);
-  const [pwForm, setPwForm]             = useState({ current: '', next: '', confirm: '' });
+  const [pwForm, setPwForm]             = useState({ code: '', current: '', next: '', confirm: '' });
+  const [pwCodeSent, setPwCodeSent]     = useState(false);
+  const [pwSending, setPwSending]       = useState(false);
   const [pwError, setPwError]           = useState('');
   const [pwSuccess, setPwSuccess]       = useState('');
   const [saving, setSaving]             = useState(false);
@@ -80,15 +82,26 @@ export default function ProfilePage() {
     finally { setSaving(false); }
   }
 
+  async function handleSendCode() {
+    setPwError(''); setPwSuccess(''); setPwSending(true);
+    try {
+      await sendPasswordChangeCode();
+      setPwCodeSent(true);
+    } catch (err) {
+      setPwError(err.message);
+    } finally { setPwSending(false); }
+  }
+
   async function handleChangePassword(e) {
     e.preventDefault();
     setPwError(''); setPwSuccess('');
-    if (pwForm.next !== pwForm.confirm) { setPwError('Passwords não coincidem'); return; }
+    if (pwForm.next !== pwForm.confirm) { setPwError('Passwords do not match'); return; }
     setSaving(true);
     try {
-      await changePassword(pwForm.current, pwForm.next);
-      setPwSuccess('Password alterada com sucesso!');
-      setPwForm({ current: '', next: '', confirm: '' });
+      await changePassword(pwForm.current, pwForm.next, pwForm.code);
+      setPwSuccess('Password changed successfully!');
+      setPwForm({ code: '', current: '', next: '', confirm: '' });
+      setPwCodeSent(false);
     } catch (err) {
       setPwError(err.message);
     } finally { setSaving(false); }
@@ -198,39 +211,76 @@ export default function ProfilePage() {
             </div>
 
             <div className="profile-page__card">
-              <h2 className="profile-page__card-title">Alterar Password</h2>
-              <form className="profile-page__pw-form" onSubmit={handleChangePassword}>
-                <input
-                  className="profile-page__input"
-                  type="password"
-                  placeholder="Password atual"
-                  value={pwForm.current}
-                  onChange={e => setPwForm(p => ({ ...p, current: e.target.value }))}
-                  required
-                />
-                <input
-                  className="profile-page__input"
-                  type="password"
-                  placeholder="Nova password (mín. 8 carateres)"
-                  value={pwForm.next}
-                  onChange={e => setPwForm(p => ({ ...p, next: e.target.value }))}
-                  required
-                  minLength={8}
-                />
-                <input
-                  className="profile-page__input"
-                  type="password"
-                  placeholder="Confirmar nova password"
-                  value={pwForm.confirm}
-                  onChange={e => setPwForm(p => ({ ...p, confirm: e.target.value }))}
-                  required
-                />
-                {pwError   && <p className="profile-page__error">{pwError}</p>}
-                {pwSuccess && <p className="profile-page__success">{pwSuccess}</p>}
-                <button className="profile-page__btn-primary" type="submit" disabled={saving}>
-                  {saving ? 'A guardar...' : 'Alterar password'}
-                </button>
-              </form>
+              <h2 className="profile-page__card-title">Change Password</h2>
+              {profile.googleAccount
+                ? <p className="profile-page__card-desc">This account uses Google Sign-In. Password change is not available.</p>
+                : !pwCodeSent
+                  ? (
+                    <div className="profile-page__pw-form">
+                      <p className="profile-page__card-desc">
+                        A verification code will be sent to <strong>{profile.email}</strong>.
+                      </p>
+                      {pwError && <p className="profile-page__error">{pwError}</p>}
+                      <button className="profile-page__btn-primary" onClick={handleSendCode} disabled={pwSending}>
+                        {pwSending ? 'Sending...' : 'Send verification code'}
+                      </button>
+                    </div>
+                  )
+                  : (
+                    <form className="profile-page__pw-form" onSubmit={handleChangePassword}>
+                      <p className="profile-page__card-desc">Code sent to <strong>{profile.email}</strong>. Valid for 15 minutes.</p>
+                      <input
+                        className="profile-page__input"
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="Verification code"
+                        value={pwForm.code}
+                        onChange={e => setPwForm(p => ({ ...p, code: e.target.value }))}
+                        required
+                        maxLength={6}
+                      />
+                      <input
+                        className="profile-page__input"
+                        type="password"
+                        placeholder="Current password"
+                        value={pwForm.current}
+                        onChange={e => setPwForm(p => ({ ...p, current: e.target.value }))}
+                        required
+                      />
+                      <input
+                        className="profile-page__input"
+                        type="password"
+                        placeholder="New password (min. 8 characters)"
+                        value={pwForm.next}
+                        onChange={e => setPwForm(p => ({ ...p, next: e.target.value }))}
+                        required
+                        minLength={8}
+                      />
+                      <input
+                        className="profile-page__input"
+                        type="password"
+                        placeholder="Confirm new password"
+                        value={pwForm.confirm}
+                        onChange={e => setPwForm(p => ({ ...p, confirm: e.target.value }))}
+                        required
+                      />
+                      {pwError   && <p className="profile-page__error">{pwError}</p>}
+                      {pwSuccess && <p className="profile-page__success">{pwSuccess}</p>}
+                      <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+                        <button className="profile-page__btn-primary" type="submit" disabled={saving}>
+                          {saving ? 'Saving...' : 'Change password'}
+                        </button>
+                        <button
+                          type="button"
+                          className="profile-page__btn-secondary"
+                          onClick={() => { setPwCodeSent(false); setPwError(''); setPwForm({ code: '', current: '', next: '', confirm: '' }); }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  )
+              }
             </div>
           </div>
         )}

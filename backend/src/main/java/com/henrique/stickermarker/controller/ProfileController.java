@@ -29,6 +29,12 @@ public class ProfileController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/me/change-password/send-code")
+    public ResponseEntity<Void> sendPasswordChangeCode(Authentication auth) {
+        userService.sendPasswordChangeCode(userId(auth));
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/me/change-password")
     public ResponseEntity<Void> changePassword(
             @RequestBody @Valid ChangePasswordDTO dto,

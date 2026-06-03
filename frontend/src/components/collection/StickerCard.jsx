@@ -8,9 +8,10 @@ function currentTotal(status, duplicateCount) {
   return 1 + (duplicateCount || 0);
 }
 
-export default function StickerCard({ code, status, duplicateCount, onSave }) {
+export default function StickerCard({ code, status, duplicateCount, onSave, quickMode, activeTab }) {
   const [isOpen, setIsOpen] = useState(false);
   const [delta, setDelta] = useState(0);
+  const [flash, setFlash] = useState(null);
 
   const total = currentTotal(status, duplicateCount);
   const statusClass = status?.toLowerCase() ?? 'missing';
@@ -26,14 +27,29 @@ export default function StickerCard({ code, status, duplicateCount, onSave }) {
     setIsOpen(false);
   }
 
+  function handleQuickClick() {
+    const removing = activeTab === 'OWNED' || activeTab === 'DUPLICATE';
+    const d = removing ? -1 : 1;
+    if (d === -1 && status === 'MISSING') return;
+    onSave?.(d);
+    setFlash(d > 0 ? 'add' : 'remove');
+    setTimeout(() => setFlash(null), 300);
+  }
+
+  function handleClick() {
+    if (isOpen) return;
+    if (quickMode) { handleQuickClick(); return; }
+    openOverlay();
+  }
+
   return (
     <>
       {isOpen && (
         <div className="sticker-overlay__backdrop" onClick={() => setIsOpen(false)} />
       )}
       <div
-        className={`sticker-card sticker-card--${statusClass}${isOpen ? ' sticker-card--open' : ''}`}
-        onClick={!isOpen ? openOverlay : undefined}
+        className={`sticker-card sticker-card--${statusClass}${isOpen ? ' sticker-card--open' : ''}${quickMode ? ' sticker-card--quick' : ''}${flash ? ` sticker-card--flash-${flash}` : ''}`}
+        onClick={handleClick}
       >
         <span className="sticker-card__code">{code}</span>
         <img src={defaultSticker} alt={code} className="sticker-card__img" />

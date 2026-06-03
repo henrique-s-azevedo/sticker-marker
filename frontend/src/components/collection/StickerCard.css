@@ -146,3 +146,30 @@
 .sticker-card__overlay-save:hover {
   background: var(--color-primary-hover);
 }
+
+/* Quick mode */
+.sticker-card--quick {
+  transition: transform 0.1s, opacity 0.1s;
+}
+
+.sticker-card--quick:active {
+  transform: scale(0.88);
+}
+
+@keyframes flash-add {
+  0%   { box-shadow: 0 0 0 3px var(--color-owned); }
+  100% { box-shadow: 0 0 0 0px transparent; }
+}
+
+@keyframes flash-remove {
+  0%   { box-shadow: 0 0 0 3px var(--color-stat-missing); }
+  100% { box-shadow: 0 0 0 0px transparent; }
+}
+
+.sticker-card--flash-add {
+  animation: flash-add 0.3s ease-out forwards;
+}
+
+.sticker-card--flash-remove {
+  animation: flash-remove 0.3s ease-out forwards;
+}

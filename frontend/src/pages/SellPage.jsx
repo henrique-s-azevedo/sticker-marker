@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+
 import { calculateSell, calculateBuy, proposeSell, proposeBuy } from '../services/sellService';
 import './SellPage.css';
 

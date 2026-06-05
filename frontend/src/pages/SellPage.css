@@ -1,0 +1,297 @@
+.sell-page {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background: var(--color-bg);
+}
+
+.sell-page__status {
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.sell-page__status--error {
+  color: var(--color-stat-missing);
+}
+
+.sell-page__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.sell-page__back {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-md);
+  cursor: pointer;
+}
+
+.sell-page__title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.sell-page__subtitle {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.sell-page__body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+/* Controls */
+.sell-page__controls {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.sell-page__price-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.sell-page__price-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.sell-page__price-input {
+  width: 90px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  text-align: right;
+}
+
+.sell-page__price-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.sell-page__price-unit {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.sell-page__btn-confirm {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.sell-page__btn-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sell-page__error {
+  color: var(--color-stat-missing);
+  font-size: var(--font-size-sm);
+}
+
+/* Sticker list */
+.sell-page__stickers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.sell-page__section-title {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  margin-bottom: var(--spacing-xs);
+}
+
+.sell-page__empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-sm) 0;
+}
+
+.sell-page__sticker-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.sell-page__sticker {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  width: 100%;
+}
+
+.sell-page__sticker:hover {
+  border-color: var(--color-primary);
+}
+
+.sell-page__sticker--selected {
+  border-color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb, 99, 102, 241), 0.08);
+}
+
+.sell-page__sticker-code {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  font-family: monospace;
+  color: var(--color-primary);
+}
+
+.sell-page__sticker-name {
+  font-size: var(--font-size-xs);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sell-page__sticker-team {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.sell-page__sticker-check {
+  width: 16px;
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+}
+
+/* Confirmed batches */
+.sell-page__batches {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.sell-page__batch {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.sell-page__batch-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sell-page__batch-codes {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  font-family: monospace;
+  word-break: break-all;
+}
+
+.sell-page__batch-price {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.sell-page__batch-remove {
+  background: none;
+  border: 1px solid var(--color-stat-missing);
+  border-radius: var(--radius-sm);
+  color: var(--color-stat-missing);
+  font-size: var(--font-size-md);
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sell-page__total {
+  text-align: right;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  padding: var(--spacing-xs) 0;
+}
+
+.sell-page__total strong {
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+}
+
+/* Footer */
+.sell-page__footer {
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.sell-page__btn-finalize {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.sell-page__btn-finalize:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sell-page__btn-cancel {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}

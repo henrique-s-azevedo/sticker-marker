@@ -10,6 +10,7 @@ import InvitePage from './pages/InvitePage';
 import ChatPage from './pages/ChatPage';
 import TradePage from './pages/TradePage';
 import TradeRespondPage from './pages/TradeRespondPage';
+import SellPage from './pages/SellPage';
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/chat/:friendId"      element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
           <Route path="/trade/:friendId"     element={<ProtectedRoute><TradePage /></ProtectedRoute>} />
           <Route path="/trade-respond/:tradeId" element={<ProtectedRoute><TradeRespondPage /></ProtectedRoute>} />
+          <Route path="/sell/:friendId"         element={<ProtectedRoute><SellPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/collection" replace />} />
         </Routes>
       </BrowserRouter>

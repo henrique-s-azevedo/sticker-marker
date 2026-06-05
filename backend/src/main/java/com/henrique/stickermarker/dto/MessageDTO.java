@@ -1,6 +1,7 @@
 package com.henrique.stickermarker.dto;
 
 import com.henrique.stickermarker.model.MessageType;
+import com.henrique.stickermarker.model.SellProposalStatus;
 import com.henrique.stickermarker.model.TradeStatus;
 import lombok.Data;
 
@@ -17,4 +18,7 @@ public class MessageDTO {
     private MessageType messageType;
     private Long tradeProposalId;
     private TradeStatus tradeStatus;
+    private Long sellProposalId;
+    private SellProposalStatus sellProposalStatus;
+    private Long sellProposalSellerId;
 }

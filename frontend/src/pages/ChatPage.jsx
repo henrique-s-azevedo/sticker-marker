@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getConversation, sendMessage, markRead } from '../services/messageService';
 import { getFriends } from '../services/friendshipService';
 import { confirmTrade, respondTrade, completeTrade } from '../services/tradeService';
+import { completeSell, cancelSell } from '../services/sellService';
 import { getAccessToken } from '../context/AuthContext';
 import './ChatPage.css';
 
@@ -107,9 +108,10 @@ export default function ChatPage() {
         )}
         {messages.map(msg => {
           const mine = msg.senderId === myId;
-          const isTradeMsg = msg.messageType && msg.messageType !== 'CHAT';
+          const TRADE_TYPES = ['TRADE_PROPOSAL', 'TRADE_RESPONSE', 'TRADE_CONFIRMED', 'TRADE_REJECTED'];
+          const SELL_TYPES  = ['SELL_PROPOSAL', 'BUY_PROPOSAL'];
 
-          if (isTradeMsg) {
+          if (TRADE_TYPES.includes(msg.messageType)) {
             return (
               <TradeMessageCard
                 key={msg.id}
@@ -118,6 +120,18 @@ export default function ChatPage() {
                 myId={myId}
                 formatTime={formatTime}
                 navigate={navigate}
+                onRefresh={load}
+              />
+            );
+          }
+
+          if (SELL_TYPES.includes(msg.messageType)) {
+            return (
+              <SellMessageCard
+                key={msg.id}
+                msg={msg}
+                myId={myId}
+                formatTime={formatTime}
                 onRefresh={load}
               />
             );
@@ -153,6 +167,64 @@ export default function ChatPage() {
           Enviar
         </button>
       </form>
+    </div>
+  );
+}
+
+function SellMessageCard({ msg, myId, formatTime, onRefresh }) {
+  const [acting, setActing] = useState(false);
+  const [err, setErr] = useState('');
+
+  const sellId = msg.sellProposalId;
+  const sellStatus = msg.sellProposalStatus;
+  const sellerId = msg.sellProposalSellerId;
+
+  // Only the seller sees the action buttons
+  const canAct = myId === sellerId && sellStatus === 'PENDING';
+
+  async function act(fn) {
+    setActing(true);
+    setErr('');
+    try {
+      await fn();
+      onRefresh();
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setActing(false);
+    }
+  }
+
+  const isDone = sellStatus === 'COMPLETED';
+  const isCancelled = sellStatus === 'CANCELLED';
+
+  return (
+    <div className="chat-page__trade-wrap">
+      <div className={`chat-page__trade-card${isDone ? ' chat-page__trade-card--confirmed' : ''}${isCancelled ? ' chat-page__trade-card--rejected' : ''}`}>
+        <p className="chat-page__trade-content">{msg.content}</p>
+        <span className="chat-page__trade-time">{formatTime(msg.sentAt)}</span>
+
+        {canAct && (
+          <div className="chat-page__trade-actions">
+            <button
+              className="chat-page__trade-btn chat-page__trade-btn--complete"
+              disabled={acting}
+              onClick={() => act(() => completeSell(sellId))}
+            >
+              {acting ? 'A aplicar...' : 'Venda efetuada'}
+            </button>
+            <button
+              className="chat-page__trade-btn chat-page__trade-btn--danger"
+              disabled={acting}
+              onClick={() => act(() => cancelSell(sellId))}
+            >
+              Cancelar venda
+            </button>
+          </div>
+        )}
+
+        {err && <p className="chat-page__trade-err">{err}</p>}
+      </div>
     </div>
   );
 }

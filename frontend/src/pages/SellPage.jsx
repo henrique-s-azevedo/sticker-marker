@@ -1,0 +1,193 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { calculateSell, calculateBuy, proposeSell, proposeBuy } from '../services/sellService';
+import './SellPage.css';
+
+export default function SellPage() {
+  const { friendId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const mode = location.state?.mode ?? 'sell'; // 'sell' | 'buy'
+  const isSell = mode === 'sell';
+
+  const [calc, setCalc] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [sending, setSending] = useState(false);
+
+  const [selected, setSelected] = useState(new Set());
+  const [price, setPrice] = useState('');
+  const [batches, setBatches] = useState([]);
+
+  const usedCodes = new Set(batches.flatMap(b => b.stickerCodes));
+
+  useEffect(() => {
+    const fn = isSell ? calculateSell : calculateBuy;
+    fn(Number(friendId))
+      .then(setCalc)
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [friendId, isSell]);
+
+  function toggleSticker(code) {
+    setSelected(prev => {
+      const next = new Set(prev);
+      next.has(code) ? next.delete(code) : next.add(code);
+      return next;
+    });
+  }
+
+  function confirmBatch() {
+    if (selected.size === 0) return;
+    const parsedPrice = parseFloat(price);
+    if (isNaN(parsedPrice) || parsedPrice < 0) {
+      setError('Indica um preço válido (pode ser 0)');
+      return;
+    }
+    setError('');
+    setBatches(prev => [...prev, {
+      stickerCodes: [...selected],
+      pricePerUnit: parsedPrice,
+    }]);
+    setSelected(new Set());
+    setPrice('');
+  }
+
+  function removeBatch(index) {
+    setBatches(prev => prev.filter((_, i) => i !== index));
+  }
+
+  async function handleFinalize() {
+    if (batches.length === 0 || sending) return;
+    setSending(true);
+    setError('');
+    try {
+      const fn = isSell ? proposeSell : proposeBuy;
+      await fn(Number(friendId), batches);
+      navigate(`/chat/${friendId}`);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setSending(false);
+    }
+  }
+
+  const availableStickers = calc?.availableStickers.filter(s => !usedCodes.has(s.code)) ?? [];
+  const total = batches.reduce((sum, b) => sum + b.pricePerUnit * b.stickerCodes.length, 0);
+
+  if (loading) return <div className="sell-page__status">A carregar...</div>;
+  if (error && !calc) return <div className="sell-page__status sell-page__status--error">{error}</div>;
+
+  return (
+    <div className="sell-page">
+      <header className="sell-page__header">
+        <button className="sell-page__back" onClick={() => navigate(`/chat/${friendId}`)}>←</button>
+        <div>
+          <h1 className="sell-page__title">
+            {isSell ? `Vender para ${calc?.friendDisplayName}` : `Comprar de ${calc?.friendDisplayName}`}
+          </h1>
+          <p className="sell-page__subtitle">
+            {isSell
+              ? `Os teus repetidos que @${calc?.friendUserTag} precisa`
+              : `Repetidos de @${calc?.friendUserTag} que precisas`}
+          </p>
+        </div>
+      </header>
+
+      <div className="sell-page__body">
+        {/* Price + confirm */}
+        <div className="sell-page__controls">
+          <div className="sell-page__price-row">
+            <label className="sell-page__price-label">Preço por cromo:</label>
+            <input
+              className="sell-page__price-input"
+              type="number"
+              min="0"
+              step="0.05"
+              placeholder="0.25"
+              value={price}
+              onChange={e => setPrice(e.target.value)}
+            />
+            <span className="sell-page__price-unit">€</span>
+          </div>
+          <button
+            className="sell-page__btn-confirm"
+            onClick={confirmBatch}
+            disabled={selected.size === 0}
+          >
+            Confirmar seleção ({selected.size} cromo{selected.size !== 1 ? 's' : ''})
+          </button>
+          {error && <p className="sell-page__error">{error}</p>}
+        </div>
+
+        {/* Sticker list */}
+        <div className="sell-page__stickers">
+          <h2 className="sell-page__section-title">
+            Disponíveis ({availableStickers.length})
+          </h2>
+          {availableStickers.length === 0 ? (
+            <p className="sell-page__empty">
+              {calc?.availableStickers.length === 0
+                ? (isSell
+                    ? 'Não tens repetidos que este amigo precise.'
+                    : 'Este amigo não tem repetidos que precises.')
+                : 'Todos os cromos já estão em grupos confirmados.'}
+            </p>
+          ) : (
+            <div className="sell-page__sticker-list">
+              {availableStickers.map(s => (
+                <button
+                  key={s.code}
+                  className={`sell-page__sticker${selected.has(s.code) ? ' sell-page__sticker--selected' : ''}`}
+                  onClick={() => toggleSticker(s.code)}
+                >
+                  <span className="sell-page__sticker-code">{s.code}</span>
+                  <span className="sell-page__sticker-name">{s.playerName || s.teamName}</span>
+                  <span className="sell-page__sticker-team">{s.teamInitial}</span>
+                  <span className="sell-page__sticker-check">{selected.has(s.code) ? '✓' : ''}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Confirmed batches */}
+        {batches.length > 0 && (
+          <div className="sell-page__batches">
+            <h2 className="sell-page__section-title">Lista de venda</h2>
+            {batches.map((batch, i) => {
+              const batchTotal = (batch.pricePerUnit * batch.stickerCodes.length).toFixed(2);
+              return (
+                <div key={i} className="sell-page__batch">
+                  <div className="sell-page__batch-info">
+                    <span className="sell-page__batch-codes">{batch.stickerCodes.join(', ')}</span>
+                    <span className="sell-page__batch-price">
+                      {batchTotal}€ ({batch.pricePerUnit.toFixed(2)}€ cada)
+                    </span>
+                  </div>
+                  <button className="sell-page__batch-remove" onClick={() => removeBatch(i)}>×</button>
+                </div>
+              );
+            })}
+            <div className="sell-page__total">
+              Total: <strong>{total.toFixed(2)}€</strong>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="sell-page__footer">
+        <button
+          className="sell-page__btn-finalize"
+          onClick={handleFinalize}
+          disabled={batches.length === 0 || sending}
+        >
+          {sending ? 'A enviar...' : (isSell ? 'Finalizar pedido de venda' : 'Finalizar pedido de compra')}
+        </button>
+        <button className="sell-page__btn-cancel" onClick={() => navigate(`/chat/${friendId}`)}>
+          Cancelar
+        </button>
+      </div>
+    </div>
+  );
+}

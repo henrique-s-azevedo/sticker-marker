@@ -35,6 +35,8 @@ public class Message {
 
     private Long tradeProposalId;
 
+    private Long sellProposalId;
+
     @PrePersist
     void onCreate() {
         sentAt = Instant.now();

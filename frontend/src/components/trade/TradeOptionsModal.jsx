@@ -46,11 +46,25 @@ export default function TradeOptionsModal({ friend, onClose }) {
               </div>
             </button>
 
-            <button className="trade-modal__option trade-modal__option--disabled" disabled>
+            <button
+              className="trade-modal__option"
+              onClick={() => { onClose(); navigate(`/sell/${friend.id}`, { state: { mode: 'sell' } }); }}
+            >
               <span className="trade-modal__option-icon">💰</span>
               <div>
-                <p className="trade-modal__option-title">Comparar e comprar</p>
-                <p className="trade-modal__option-desc">Em breve</p>
+                <p className="trade-modal__option-title">Vender</p>
+                <p className="trade-modal__option-desc">Vende os teus repetidos a este amigo</p>
+              </div>
+            </button>
+
+            <button
+              className="trade-modal__option"
+              onClick={() => { onClose(); navigate(`/sell/${friend.id}`, { state: { mode: 'buy' } }); }}
+            >
+              <span className="trade-modal__option-icon">🛒</span>
+              <div>
+                <p className="trade-modal__option-title">Comprar</p>
+                <p className="trade-modal__option-desc">Compra repetidos a este amigo</p>
               </div>
             </button>
           </div>

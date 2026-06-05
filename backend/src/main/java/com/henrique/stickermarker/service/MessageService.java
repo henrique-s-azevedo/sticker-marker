@@ -8,6 +8,7 @@ import com.henrique.stickermarker.model.MessageType;
 import com.henrique.stickermarker.model.TradeProposal;
 import com.henrique.stickermarker.model.User;
 import com.henrique.stickermarker.repository.MessageRepository;
+import com.henrique.stickermarker.repository.SellProposalRepository;
 import com.henrique.stickermarker.repository.TradeProposalRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class MessageService {
     private final UserService userService;
     private final FriendshipService friendshipService;
     private final TradeProposalRepository tradeProposalRepository;
+    private final SellProposalRepository sellProposalRepository;
 
     public MessageDTO send(Long senderId, Long recipientId, SendMessageDTO dto) {
         if (!friendshipService.areFriends(senderId, recipientId)) {
@@ -45,6 +47,19 @@ public class MessageService {
         msg.setContent(content);
         msg.setMessageType(type);
         msg.setTradeProposalId(tradeProposalId);
+        return toDTO(messageRepository.save(msg));
+    }
+
+    public MessageDTO sendSellInternal(Long senderId, Long recipientId, String content, MessageType type, Long sellProposalId) {
+        User sender = userService.getById(senderId);
+        User recipient = userService.getById(recipientId);
+
+        Message msg = new Message();
+        msg.setSender(sender);
+        msg.setRecipient(recipient);
+        msg.setContent(content);
+        msg.setMessageType(type);
+        msg.setSellProposalId(sellProposalId);
         return toDTO(messageRepository.save(msg));
     }
 
@@ -113,6 +128,14 @@ public class MessageService {
         if (m.getTradeProposalId() != null) {
             tradeProposalRepository.findById(m.getTradeProposalId())
                     .ifPresent(trade -> dto.setTradeStatus(trade.getStatus()));
+        }
+        dto.setSellProposalId(m.getSellProposalId());
+        if (m.getSellProposalId() != null) {
+            sellProposalRepository.findById(m.getSellProposalId())
+                    .ifPresent(sell -> {
+                        dto.setSellProposalStatus(sell.getStatus());
+                        dto.setSellProposalSellerId(sell.getSeller().getId());
+                    });
         }
         return dto;
     }

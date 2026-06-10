@@ -182,7 +182,7 @@ export default function CollectionPage() {
         <div className="collection-page__header-actions">
           <button
             className="collection-page__profile-btn"
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate('/profile', { state: { tab: 'messages' } })}
             title="Mensagens"
             aria-label="Mensagens"
           >

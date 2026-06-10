@@ -12,7 +12,11 @@
 }
 
 .sticker-section__flag {
-  font-size: var(--font-size-lg);
+  width: 24px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 2px;
 }
 
 .sticker-section__name {

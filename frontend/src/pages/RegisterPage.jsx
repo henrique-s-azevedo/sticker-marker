@@ -16,7 +16,6 @@ export default function RegisterPage() {
     lastName: '',
     email: '',
     password: '',
-    terms: false,
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -86,19 +85,9 @@ export default function RegisterPage() {
             required
           />
 
-          <label className="auth-form__checkbox">
-            <input
-              type="checkbox"
-              name="terms"
-              checked={form.terms}
-              onChange={handleChange}
-            />
-            <span>I agree to the <Link to="/terms">Terms &amp; Conditions</Link></span>
-          </label>
-
           {error && <p className="auth-form__error">{error}</p>}
 
-          <Button type="submit" fullWidth disabled={!form.terms || loading}>
+          <Button type="submit" fullWidth disabled={loading}>
             {loading ? 'A criar conta...' : 'Create account'}
           </Button>
         </form>
@@ -109,7 +98,6 @@ export default function RegisterPage() {
 
         <div className="auth-form__social">
           <GoogleSignInButton onError={setError} />
-          <Button variant="outline" fullWidth disabled>Apple</Button>
         </div>
       </div>
     </AuthLayout>

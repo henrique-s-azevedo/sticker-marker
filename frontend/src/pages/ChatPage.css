@@ -84,18 +84,18 @@
 
 .chat-page__bubble-wrap {
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-end;
 }
 
 .chat-page__bubble-wrap--mine {
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .chat-page__bubble {
   max-width: 70%;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 16px 16px 16px 4px;
+  border-radius: 16px 16px 4px 16px;
   padding: var(--spacing-sm) var(--spacing-md);
   display: flex;
   flex-direction: column;
@@ -105,7 +105,7 @@
 .chat-page__bubble--mine {
   background: var(--color-primary);
   border-color: var(--color-primary);
-  border-radius: 16px 16px 4px 16px;
+  border-radius: 16px 16px 16px 4px;
   color: #fff;
 }
 
@@ -162,11 +162,15 @@
   cursor: not-allowed;
 }
 
-/* Trade message cards */
+/* Trade/sell message cards */
 .chat-page__trade-wrap {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   margin: var(--spacing-sm) 0;
+}
+
+.chat-page__trade-wrap--mine {
+  justify-content: flex-start;
 }
 
 .chat-page__trade-card {

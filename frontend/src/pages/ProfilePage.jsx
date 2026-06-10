@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   getProfile, updateVisibility, changePassword, sendPasswordChangeCode,
@@ -23,8 +23,9 @@ const VISIBILITY_LABELS = {
 
 export default function ProfilePage() {
   const navigate  = useNavigate();
+  const location  = useLocation();
   const { logout } = useAuth();
-  const [tab, setTab]                   = useState('profile');
+  const [tab, setTab]                   = useState(location.state?.tab ?? 'profile');
   const [profile, setProfile]           = useState(null);
   const [friends, setFriends]           = useState([]);
   const [requests, setRequests]         = useState([]);

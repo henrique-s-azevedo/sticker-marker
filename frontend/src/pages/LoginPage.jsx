@@ -72,7 +72,6 @@ export default function LoginPage() {
 
         <div className="auth-form__social">
           <GoogleSignInButton onError={setError} />
-          <Button variant="outline" fullWidth disabled>Apple</Button>
         </div>
       </div>
     </AuthLayout>

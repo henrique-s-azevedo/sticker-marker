@@ -130,9 +130,12 @@ export default function ChatPage() {
               <SellMessageCard
                 key={msg.id}
                 msg={msg}
+                mine={mine}
                 myId={myId}
+                friend={friend}
                 formatTime={formatTime}
                 onRefresh={load}
+                navigate={navigate}
               />
             );
           }
@@ -171,16 +174,26 @@ export default function ChatPage() {
   );
 }
 
-function SellMessageCard({ msg, myId, formatTime, onRefresh }) {
+function SellMessageCard({ msg, mine, myId, friend, formatTime, onRefresh, navigate }) {
   const [acting, setActing] = useState(false);
   const [err, setErr] = useState('');
+  const [dismissed, setDismissed] = useState(false);
 
   const sellId = msg.sellProposalId;
   const sellStatus = msg.sellProposalStatus;
-  const sellerId = msg.sellProposalSellerId;
+  const isSellProposal = msg.messageType === 'SELL_PROPOSAL';
+  const iAmSeller = myId === msg.sellProposalSellerId;
+  const friendName = friend?.displayName ?? 'o outro utilizador';
 
-  // Only the seller sees the action buttons
-  const canAct = myId === sellerId && sellStatus === 'PENDING';
+  // While pending: only the RECIPIENT of the proposal sees the action buttons
+  // SELL_PROPOSAL → receiver is the buyer (not the seller)
+  // BUY_PROPOSAL  → receiver is the seller (iAmSeller)
+  const shouldSeeButtons = sellStatus === 'PENDING' && (
+    (isSellProposal && !iAmSeller) ||
+    (!isSellProposal && iAmSeller)
+  );
+  const acceptLabel = isSellProposal ? 'Aceitar a compra' : 'Aceitar a venda';
+  const rejectLabel = isSellProposal ? 'Rejeitar a compra' : 'Rejeitar a venda';
 
   async function act(fn) {
     setActing(true);
@@ -195,34 +208,81 @@ function SellMessageCard({ msg, myId, formatTime, onRefresh }) {
     }
   }
 
-  const isDone = sellStatus === 'COMPLETED';
-  const isCancelled = sellStatus === 'CANCELLED';
+  if (dismissed) return null;
+
+  const wrapClass = `chat-page__trade-wrap${mine ? ' chat-page__trade-wrap--mine' : ''}`;
+
+  if (sellStatus === 'COMPLETED') {
+    let message;
+    if (mine) {
+      message = isSellProposal
+        ? `O "${friendName}" aceitou a tua venda.\nQuando completares a venda em mão e tiveres os cromos clica no botão para atualizar automaticamente a tua coleção:`
+        : `O "${friendName}" aceitou a tua compra.\nQuando completares a compra em mão e tiveres os cromos clica no botão para atualizar automaticamente a tua coleção:`;
+    } else {
+      message = isSellProposal
+        ? `Aceitaste a proposta.\nQuando completares a compra em mão e tiveres os cromos clica no botão para atualizar automaticamente a tua coleção:`
+        : `Aceitaste a proposta.\nQuando completares a venda em mão e tiveres os cromos clica no botão para atualizar automaticamente a tua coleção:`;
+    }
+    return (
+      <div className={wrapClass}>
+        <div className="chat-page__trade-card chat-page__trade-card--confirmed">
+          <p className="chat-page__trade-content">{message}</p>
+          <div className="chat-page__trade-actions">
+            <button
+              className="chat-page__trade-btn chat-page__trade-btn--complete"
+              onClick={() => { setDismissed(true); navigate('/collection'); }}
+            >
+              Atualizar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (sellStatus === 'CANCELLED') {
+    return (
+      <div className={wrapClass}>
+        <div className="chat-page__trade-card chat-page__trade-card--rejected">
+          <p className="chat-page__trade-content">
+            {isSellProposal ? 'Venda rejeitada' : 'Compra rejeitada'}
+          </p>
+          <div className="chat-page__trade-actions">
+            <button
+              className="chat-page__trade-btn"
+              onClick={() => setDismissed(true)}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="chat-page__trade-wrap">
-      <div className={`chat-page__trade-card${isDone ? ' chat-page__trade-card--confirmed' : ''}${isCancelled ? ' chat-page__trade-card--rejected' : ''}`}>
+    <div className={wrapClass}>
+      <div className="chat-page__trade-card">
         <p className="chat-page__trade-content">{msg.content}</p>
         <span className="chat-page__trade-time">{formatTime(msg.sentAt)}</span>
-
-        {canAct && (
+        {shouldSeeButtons && (
           <div className="chat-page__trade-actions">
             <button
               className="chat-page__trade-btn chat-page__trade-btn--complete"
               disabled={acting}
               onClick={() => act(() => completeSell(sellId))}
             >
-              {acting ? 'A aplicar...' : 'Venda efetuada'}
+              {acting ? 'A processar...' : acceptLabel}
             </button>
             <button
               className="chat-page__trade-btn chat-page__trade-btn--danger"
               disabled={acting}
               onClick={() => act(() => cancelSell(sellId))}
             >
-              Cancelar venda
+              {acting ? 'A processar...' : rejectLabel}
             </button>
           </div>
         )}
-
         {err && <p className="chat-page__trade-err">{err}</p>}
       </div>
     </div>
@@ -261,7 +321,7 @@ function TradeMessageCard({ msg, mine, myId, formatTime, navigate, onRefresh }) 
   const canComplete       = isConfirmed           && tradeStatus === 'CONFIRMED';
 
   return (
-    <div className="chat-page__trade-wrap">
+    <div className={`chat-page__trade-wrap${mine ? ' chat-page__trade-wrap--mine' : ''}`}>
       <div className={`chat-page__trade-card${isRejected ? ' chat-page__trade-card--rejected' : ''}${isConfirmed ? ' chat-page__trade-card--confirmed' : ''}`}>
         <p className="chat-page__trade-content">{msg.content}</p>
         <span className="chat-page__trade-time">{formatTime(msg.sentAt)}</span>

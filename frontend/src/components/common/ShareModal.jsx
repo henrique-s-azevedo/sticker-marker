@@ -8,16 +8,31 @@ const CATEGORIES = [
   { id: 'ALL',       label: 'Todos' },
 ];
 
-function buildMessage(stickers, categoryId, categoryLabel) {
-  let subset;
-  switch (categoryId) {
-    case 'MISSING':   subset = stickers.filter(s => s.status === 'MISSING'); break;
-    case 'DUPLICATE': subset = stickers.filter(s => s.status === 'DUPLICATE'); break;
-    case 'OWNED':     subset = stickers.filter(s => s.status === 'OWNED' || s.status === 'DUPLICATE'); break;
-    default:          subset = stickers;
-  }
+const FLAG_EMOJI = {
+  ALG: '🇩🇿', ARG: '🇦🇷', AUS: '🇦🇺', AUT: '🇦🇹', BEL: '🇧🇪',
+  BIH: '🇧🇦', BRA: '🇧🇷', CAN: '🇨🇦', CIV: '🇨🇮', COD: '🇨🇩',
+  COL: '🇨🇴', CPV: '🇨🇻', CRO: '🇭🇷', CUW: '🇨🇼', CZE: '🇨🇿',
+  ECU: '🇪🇨', EGY: '🇪🇬', ENG: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', EPS: '🇪🇸', FRA: '🇫🇷',
+  FWC: '🌍', GER: '🇩🇪', GHA: '🇬🇭', HAI: '🇭🇹', IRN: '🇮🇷',
+  IRQ: '🇮🇶', JOR: '🇯🇴', JPN: '🇯🇵', KOR: '🇰🇷', KSA: '🇸🇦',
+  MAR: '🇲🇦', MEX: '🇲🇽', NED: '🇳🇱', NOR: '🇳🇴', NZL: '🇳🇿',
+  PAN: '🇵🇦', PAR: '🇵🇾', POR: '🇵🇹', QAT: '🇶🇦', RSA: '🇿🇦',
+  SCO: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', SEN: '🇸🇳', SUI: '🇨🇭', SWE: '🇸🇪', TUN: '🇹🇳',
+  TUR: '🇹🇷', URU: '🇺🇾', USA: '🇺🇸', UZB: '🇺🇿',
+};
 
-  if (subset.length === 0) return `WC 2026 - ${categoryLabel}\n(nenhum cromo)`;
+function getSubset(stickers, categoryId) {
+  switch (categoryId) {
+    case 'MISSING':   return stickers.filter(s => s.status === 'MISSING');
+    case 'DUPLICATE': return stickers.filter(s => s.status === 'DUPLICATE');
+    case 'OWNED':     return stickers.filter(s => s.status === 'OWNED' || s.status === 'DUPLICATE');
+    default:          return stickers;
+  }
+}
+
+function buildSection(stickers, categoryId) {
+  const subset = getSubset(stickers, categoryId);
+  if (subset.length === 0) return '(nenhum)';
 
   const groups = {};
   for (const s of subset) {
@@ -25,21 +40,34 @@ function buildMessage(stickers, categoryId, categoryLabel) {
     groups[s.teamInitial].push(s);
   }
 
-  const lines = Object.entries(groups)
+  return Object.entries(groups)
     .sort(([, a], [, b]) =>
       Math.min(...a.map(s => s.pageNumber)) - Math.min(...b.map(s => s.pageNumber))
     )
     .map(([prefix, items]) => {
+      const flag = FLAG_EMOJI[prefix] ?? '';
       const nums = items
         .sort((a, b) => a.pageNumber - b.pageNumber)
-        .map(s => {
-          const num = s.code.startsWith(prefix) ? s.code.slice(prefix.length) : s.code;
-          return num || s.code;
-        });
-      return `${prefix}: ${nums.join(', ')}`;
-    });
+        .map(s => s.code.startsWith(prefix) ? s.code.slice(prefix.length) : s.code);
+      return `${prefix}${flag}: ${nums.join(', ')}`;
+    })
+    .join('\n');
+}
 
-  return `WC 2026 - ${categoryLabel}\n${lines.join('\n')}`;
+function buildMessage(stickers, categoryId, categoryLabel) {
+  const mainSection = buildSection(stickers, categoryId);
+  const ownedSection  = buildSection(stickers, 'OWNED');
+  const missingSection = buildSection(stickers, 'MISSING');
+  const dupSection    = buildSection(stickers, 'DUPLICATE');
+
+  return [
+    `WC 2026 - ${categoryLabel}`,
+    mainSection,
+    '',
+    `Colecionados:\n${ownedSection}`,
+    `Em falta:\n${missingSection}`,
+    `Repetidos:\n${dupSection}`,
+  ].join('\n');
 }
 
 export default function ShareModal({ mode, stickers, onClose }) {

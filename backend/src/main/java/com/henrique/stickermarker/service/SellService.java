@@ -53,7 +53,7 @@ public class SellService {
         SellProposal proposal = buildProposal(seller, buyer, dto.getBatches());
         SellProposal saved = sellProposalRepository.save(proposal);
 
-        String content = buildMessageContent(seller.getDisplayName(), dto.getBatches(), true);
+        String content = buildMessageContent(buyer.getDisplayName(), dto.getBatches(), true);
         messageService.sendSellInternal(sellerId, buyerId, content, MessageType.SELL_PROPOSAL, saved.getId());
 
         return toDTO(saved);
@@ -72,17 +72,19 @@ public class SellService {
         SellProposal proposal = buildProposal(seller, buyer, dto.getBatches());
         SellProposal saved = sellProposalRepository.save(proposal);
 
-        String content = buildMessageContent(buyer.getDisplayName(), dto.getBatches(), false);
+        String content = buildMessageContent(seller.getDisplayName(), dto.getBatches(), false);
         messageService.sendSellInternal(buyerId, sellerId, content, MessageType.BUY_PROPOSAL, saved.getId());
 
         return toDTO(saved);
     }
 
     @Transactional
-    public SellProposalDTO completeSell(Long sellId, Long sellerId) {
+    public SellProposalDTO completeSell(Long sellId, Long userId) {
         SellProposal proposal = getAndValidate(sellId);
-        if (!proposal.getSeller().getId().equals(sellerId)) {
-            throw new IllegalArgumentException("Só o vendedor pode confirmar a venda");
+        boolean isParticipant = proposal.getSeller().getId().equals(userId)
+                || proposal.getBuyer().getId().equals(userId);
+        if (!isParticipant) {
+            throw new IllegalArgumentException("Sem permissão para confirmar esta proposta");
         }
         if (proposal.getStatus() != SellProposalStatus.PENDING) {
             throw new IllegalArgumentException("Proposta já foi processada");
@@ -188,24 +190,21 @@ public class SellService {
         return proposal;
     }
 
-    private String buildMessageContent(String proposerName, List<SellBatchDTO> batches, boolean isSelling) {
+    private String buildMessageContent(String recipientName, List<SellBatchDTO> batches, boolean isSelling) {
         StringBuilder sb = new StringBuilder();
-        sb.append(proposerName).append(isSelling ? " quer vender:\n" : " quer comprar:\n");
+        sb.append(recipientName).append(isSelling ? ", quero vender:\n" : ", quero comprar:\n");
         BigDecimal total = BigDecimal.ZERO;
         for (SellBatchDTO batch : batches) {
-            String codes = String.join(", ", batch.getStickerCodes());
-            BigDecimal batchTotal = batch.getPricePerUnit()
-                    .multiply(BigDecimal.valueOf(batch.getStickerCodes().size()));
-            total = total.add(batchTotal);
-            sb.append("  ").append(codes)
-              .append(" → ").append(String.format(Locale.ENGLISH, "%.2f€", batchTotal))
-              .append(" (").append(String.format(Locale.ENGLISH, "%.2f€", batch.getPricePerUnit()))
-              .append(" cada)\n");
+            for (String code : batch.getStickerCodes()) {
+                sb.append(code)
+                  .append(" - ")
+                  .append(String.format(Locale.ENGLISH, "%.2f€", batch.getPricePerUnit()))
+                  .append("\n");
+                total = total.add(batch.getPricePerUnit());
+            }
         }
         sb.append("Total: ").append(String.format(Locale.ENGLISH, "%.2f€", total)).append("\n");
-        sb.append(isSelling
-                ? "Confirma ou contraproponha nas opções de compra."
-                : "Informa se confirmas a venda.");
+        sb.append("Envia mensagem a confirmar ou rejeitar.");
         return sb.toString();
     }
 

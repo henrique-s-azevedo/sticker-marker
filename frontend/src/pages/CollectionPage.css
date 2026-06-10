@@ -94,7 +94,7 @@
 .collection-page__main {
   max-width: 1200px;
   margin: 0 auto;
-  padding: var(--spacing-xl);
+  padding: var(--spacing-xl) var(--spacing-2xl);
 }
 
 .collection-page__filters {

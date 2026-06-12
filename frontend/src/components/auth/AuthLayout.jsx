@@ -1,4 +1,4 @@
-import albumFace from '../../assets/images/capa_caderneta_copa.jpg';
+import albumFace from '../../assets/images/capa_caderneta_copa_2026.png';
 import './AuthLayout.css';
 
 export default function AuthLayout({ children }) {

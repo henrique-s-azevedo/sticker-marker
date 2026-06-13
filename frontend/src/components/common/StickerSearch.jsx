@@ -1,3 +1,10 @@
+/**
+ * Inline search bar for filtering stickers by code, team initial, or number.
+ * Shows a clear button when a query is active.
+ *
+ * @param {string} value - controlled query string
+ * @param {Function} onChange - called with the new string value
+ */
 import './StickerSearch.css';
 
 export default function StickerSearch({ value, onChange }) {

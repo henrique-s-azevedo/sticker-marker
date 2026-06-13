@@ -1,3 +1,25 @@
+/**
+ * Profile page — account settings and social hub, organized into four tabs:
+ *
+ *   Profile  — display name, email, userTag, collection visibility toggle, password change
+ *   Friends  — friend list with message/trade/view-collection actions; filterable
+ *   Requests — incoming/outgoing friend requests, user search by name or @tag
+ *   Messages — conversation list with unread badge, filterable by friend name
+ *
+ * Data loading: each tab loads its data lazily when first activated.
+ * The profile tab always loads on mount so the hero avatar renders immediately.
+ *
+ * Password change flow (two-step):
+ *   1. User clicks "Send verification code" → sendPasswordChangeCode() emails a code.
+ *   2. User enters code + current + new passwords → changePassword().
+ *   Not available for Google accounts (googleAccount flag from UserProfileDTO).
+ *
+ * TradeOptionsModal is opened from the friends tab to initiate trades/sells.
+ * AddFriendModal handles friend requests by email, tag, or QR code.
+ *
+ * UserSearchRow (local component) — search result with an inline "Add friend" button
+ * that optimistically updates to "Pedido enviado" after the request is sent.
+ */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -466,6 +488,7 @@ export default function ProfilePage() {
   );
 }
 
+/** Search result row with an inline "Add friend" button. Optimistically updates to "Pedido enviado". */
 function UserSearchRow({ user, onRequestSent }) {
   const [status, setStatus] = useState(user.friendshipStatus ?? null);
   const [loading, setLoading] = useState(false);

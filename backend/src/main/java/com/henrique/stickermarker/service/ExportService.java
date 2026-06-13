@@ -18,6 +18,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Generates a human-readable export of a user's collection status for sharing or printing.
+ *
+ * <p>The caller selects which sections to include (MISSING, OWNED, DUPLICATES) via
+ * {@link ExportSection} flags. The output contains both structured data (section DTOs)
+ * and a pre-formatted plain-text representation suitable for copy-paste.</p>
+ *
+ * <p>Sticker codes are sorted and visually grouped by their 3-character prefix (e.g. "BRA")
+ * in the text output, so stickers from the same country/team cluster together.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class ExportService {
@@ -27,6 +37,16 @@ public class ExportService {
     private final UserStickerRepository userStickerRepository;
     private final UserDuplicateRepository userDuplicateRepository;
 
+    /**
+     * Generates the export for the requested sections.
+     * Issues two bulk queries (owned and duplicate codes) to avoid per-sticker lookups.
+     *
+     * @param user         the user whose collection data to export
+     * @param collectionId the collection to export
+     * @param sections     the set of sections to include in the output
+     * @return the export DTO with structured sections and a pre-formatted text block
+     * @throws RuntimeException if the collection does not exist
+     */
     public CollectionExportDTO generate(User user, Long collectionId, Set<ExportSection> sections) {
         Collection collection = collectionRepository.findById(collectionId)
                 .orElseThrow(() -> new RuntimeException("Collection not found"));
@@ -86,6 +106,15 @@ public class ExportService {
         return section;
     }
 
+    /**
+     * Formats the export sections into a compact plain-text block.
+     * Codes with the same 3-character prefix are placed on the same line separated by spaces.
+     * A blank line is inserted whenever the prefix changes, visually separating country/team groups.
+     *
+     * @param collectionName the album name used as the header
+     * @param sections       the pre-built section DTOs
+     * @return the formatted plain text
+     */
     private String buildText(String collectionName, List<ExportSectionDTO> sections) {
         StringBuilder sb = new StringBuilder();
         String separator = "=".repeat(Math.max(collectionName.length(), 20));

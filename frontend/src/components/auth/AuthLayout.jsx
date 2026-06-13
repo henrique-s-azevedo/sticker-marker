@@ -1,3 +1,8 @@
+/**
+ * Two-column authentication layout: album cover image on the left,
+ * form panel on the right.
+ * Used by LoginPage and RegisterPage.
+ */
 import albumFace from '../../assets/images/capa_caderneta_copa_2026.png';
 import './AuthLayout.css';
 

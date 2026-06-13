@@ -1,3 +1,28 @@
+/**
+ * Chat page (/chat/:friendId) — real-time conversation view with trade/sell integration.
+ *
+ * Message polling: fetches new messages every 5 seconds via setInterval.
+ * After each load, markRead() is called to clear the unread badge for this conversation.
+ * The bottom of the message list is scrolled into view when messages change.
+ *
+ * Message rendering:
+ *   - Plain text messages: standard chat bubble.
+ *   - TRADE_PROPOSAL / TRADE_RESPONSE / TRADE_CONFIRMED / TRADE_REJECTED: TradeMessageCard.
+ *   - SELL_PROPOSAL / BUY_PROPOSAL: SellMessageCard.
+ *
+ * The authenticated user's ID is decoded from the JWT access token to determine
+ * message direction (mine vs. theirs) and button visibility.
+ *
+ * TradeMessageCard — shows action buttons based on tradeStatus and who sent the message:
+ *   PENDING_COUNTERPART + not mine → "Ver e aceitar" + "Rejeitar"
+ *   PENDING_PROPOSER   + not mine → "Confirmar troca" + "Cancelar"
+ *   CONFIRMED                     → "Marcar como concluída" (transfers stickers)
+ *
+ * SellMessageCard — shows accept/reject buttons to the recipient of the proposal:
+ *   SELL_PROPOSAL: recipient is the buyer (not the seller).
+ *   BUY_PROPOSAL:  recipient is the seller (iAmSeller check).
+ *   COMPLETED: shows an "Atualizar" button that navigates to /collection.
+ */
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getConversation, sendMessage, markRead } from '../services/messageService';

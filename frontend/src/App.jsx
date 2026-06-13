@@ -1,3 +1,10 @@
+/**
+ * Root component — sets up the router and wraps the entire app in AuthProvider.
+ *
+ * All routes under /collection, /profile, /chat, /trade, /sell, and /invite
+ * are wrapped in ProtectedRoute, which redirects unauthenticated users to /login.
+ * The basename comes from BASE_URL so the app works under the /sticker-marker/ subpath on GitHub Pages.
+ */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';

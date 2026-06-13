@@ -5,6 +5,10 @@ import lombok.Data;
 
 import java.time.Instant;
 
+/**
+ * Full representation of a friendship request, used for both inbound and outbound views.
+ * Returned by pending-request list endpoints so the client can show who sent or received the request.
+ */
 @Data
 public class FriendRequestDTO {
     private Long id;

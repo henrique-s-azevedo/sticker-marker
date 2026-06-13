@@ -1,3 +1,14 @@
+/**
+ * Entry-point modal for trade/sell interactions with a specific friend.
+ * Presents three options: sticker-for-sticker trade, sell, or buy.
+ *
+ * "Troca por troca" calculates the mutual trade opportunities inline and shows
+ * the result before navigating to /trade/:friendId. The other options navigate
+ * directly to /sell/:friendId with a mode flag in location state.
+ *
+ * @param {{ id: number, displayName: string }} friend
+ * @param {Function} onClose
+ */
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { calculateTrade } from '../../services/tradeService';

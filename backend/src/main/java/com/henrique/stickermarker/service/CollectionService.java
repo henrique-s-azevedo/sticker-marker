@@ -16,6 +16,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Business logic for sticker collections, including catalog queries, per-user progress,
+ * and per-sticker ownership status.
+ *
+ * <p>A {@link Collection} is a global album template shared by all users — it is not
+ * user-specific. User ownership is tracked via {@link com.henrique.stickermarker.model.UserSticker}
+ * and {@link com.henrique.stickermarker.model.UserDuplicate}.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class CollectionService {
@@ -25,6 +33,12 @@ public class CollectionService {
     private final UserStickerRepository userStickerRepository;
     private final UserDuplicateRepository userDuplicateRepository;
 
+    /**
+     * Creates a new collection (album template). Only used during initial data setup.
+     *
+     * @param dto the creation payload (name, totalStickers, totalPages)
+     * @return the persisted collection as a DTO
+     */
     public CollectionDTO create(CollectionCreateDTO dto) {
         Collection c = new Collection();
         c.setName(dto.getName());
@@ -33,6 +47,11 @@ public class CollectionService {
         return toDTO(collectionRepository.save(c));
     }
 
+    /**
+     * Returns all available collections (albums).
+     *
+     * @return list of all collection DTOs
+     */
     public List<CollectionDTO> getAll() {
         return collectionRepository.findAll()
                 .stream()
@@ -40,12 +59,25 @@ public class CollectionService {
                 .toList();
     }
 
+    /**
+     * Returns a single collection by its ID.
+     *
+     * @param id the collection ID
+     * @return the collection DTO
+     * @throws RuntimeException if the collection does not exist (mapped to 404)
+     */
     public CollectionDTO getById(Long id) {
         Collection c = collectionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Collection not found"));
         return toDTO(c);
     }
 
+    /**
+     * Returns a compact summary of all stickers in a collection, without ownership context.
+     *
+     * @param collectionId the collection to list
+     * @return list of sticker summaries (code, number, page, team, player)
+     */
     public List<StickerSummaryDTO> getStickersByCollection(Long collectionId) {
         List<Sticker> stickers = stickerRepository.findByCollection_Id(collectionId);
         return stickers.stream()
@@ -53,6 +85,15 @@ public class CollectionService {
                 .toList();
     }
 
+    /**
+     * Calculates the user's completion progress for a collection.
+     * Duplicates are summed across all sticker codes, not counted as distinct stickers.
+     *
+     * @param user         the user whose progress to calculate
+     * @param collectionId the target collection
+     * @return progress DTO with owned/missing/duplicate counts and percentage
+     * @throws RuntimeException if the collection does not exist
+     */
     public CollectionProgressDTO getProgress(User user, Long collectionId) {
         Collection c = collectionRepository.findById(collectionId)
                 .orElseThrow(() -> new RuntimeException("Collection not found"));
@@ -76,6 +117,18 @@ public class CollectionService {
         return dto;
     }
 
+    /**
+     * Returns every sticker in a collection annotated with its ownership status for the user.
+     * Status priority: DUPLICATE takes precedence over OWNED (a user who marked extras
+     * is shown as DUPLICATE, not just OWNED).
+     *
+     * <p>Two bulk queries are issued (owned codes and duplicate quantities) to avoid N+1 lookups.</p>
+     *
+     * @param user         the user whose inventory to check
+     * @param collectionId the collection to query
+     * @return list of all stickers with OWNED, DUPLICATE, or MISSING status
+     * @throws RuntimeException if the collection does not exist
+     */
     public List<CollectionStickerStatusDTO> getStickersWithStatus(User user, Long collectionId) {
         if (!collectionRepository.existsById(collectionId)) {
             throw new RuntimeException("Collection not found");
@@ -98,6 +151,14 @@ public class CollectionService {
                 .toList();
     }
 
+    /**
+     * Maps a sticker to its status DTO, applying the DUPLICATE → OWNED → MISSING priority.
+     *
+     * @param s                  the sticker to map
+     * @param ownedCodes         set of codes the user owns
+     * @param duplicateQuantities map of code → duplicate quantity
+     * @return the status DTO
+     */
     private CollectionStickerStatusDTO toStatusDTO(Sticker s, Set<String> ownedCodes, Map<String, Integer> duplicateQuantities) {
         CollectionStickerStatusDTO dto = new CollectionStickerStatusDTO();
         dto.setId(s.getId());

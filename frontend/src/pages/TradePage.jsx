@@ -1,3 +1,15 @@
+/**
+ * Trade proposal creation page (/trade/:friendId).
+ *
+ * Loads a TradeCalculationDTO on mount showing which stickers each party can offer.
+ * The user selects stickers to receive (from the friend's offerings) and to give
+ * (from their own offerings). The proposal is only enabled when both sides have
+ * the same count (balanced swap), capped at maxTrades.
+ *
+ * On success, navigates to /chat/:friendId where the proposal appears as a system message.
+ *
+ * @see TradeRespondPage for the counterpart's response flow.
+ */
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { calculateTrade, proposeTrade } from '../services/tradeService';

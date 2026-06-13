@@ -1,3 +1,8 @@
+/**
+ * Registration page — first/last name, email, password, and Google Sign-In.
+ * The display name sent to the API is formed by joining firstName and lastName.
+ * On success, calls saveSession() and navigates to /collection.
+ */
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../components/auth/AuthLayout';

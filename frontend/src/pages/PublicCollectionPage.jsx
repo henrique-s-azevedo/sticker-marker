@@ -1,3 +1,11 @@
+/**
+ * Read-only view of a friend's sticker collection, accessible via /collection/:userTag.
+ * Visibility is enforced server-side; this page does not allow any ownership mutations.
+ *
+ * Shares most layout components with CollectionPage but omits the StickerCard interaction
+ * (onSave is a no-op) and removes the share/quick-mode toolbar.
+ * COLLECTION_ID is hardcoded to 1 (single-album system).
+ */
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getFriendStickers, getFriendProgress } from '../services/friendshipService';

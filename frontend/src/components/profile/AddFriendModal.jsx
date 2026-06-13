@@ -1,3 +1,15 @@
+/**
+ * Modal for adding a friend via three methods:
+ *   - By email
+ *   - By user tag
+ *   - QR code (generates the user's own invite link and renders a QR for others to scan)
+ *
+ * The QR mode fetches the invite link on demand when the tab is selected.
+ * Sending a request by email or tag calls the friendship service and reports success inline.
+ *
+ * @param {Function} onClose
+ * @param {Function} onSuccess - called after a request is sent (triggers friend list refresh)
+ */
 import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { addFriendByEmail, addFriendByTag } from '../../services/friendshipService';

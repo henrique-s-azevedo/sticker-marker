@@ -1,3 +1,8 @@
+/**
+ * Login page — email/password form and Google Sign-In.
+ * On success, calls saveSession() from AuthContext and navigates to /collection.
+ * Errors from either auth method are displayed inline below the form.
+ */
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../components/auth/AuthLayout';

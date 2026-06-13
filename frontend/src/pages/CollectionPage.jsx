@@ -1,3 +1,25 @@
+/**
+ * Main collection page — the primary screen after login.
+ *
+ * Responsibilities:
+ *   - Loads all stickers and progress for collection 1 (hardcoded, single-album system).
+ *   - Applies tab, search, country, and sort filters entirely client-side after the initial load.
+ *   - Handles sticker ownership mutations (markOwned, removeOwned, addDuplicate,
+ *     updateDuplicate, removeDuplicate) and optimistically updates local state.
+ *
+ * Sticker state transitions (all orchestrated in handleSave):
+ *   MISSING + delta=1  → markOwned → OWNED
+ *   MISSING + delta>1  → markOwned + addDuplicate(delta-1) → DUPLICATE
+ *   OWNED + delta=-1   → removeOwned → MISSING
+ *   OWNED + delta>0    → addDuplicate(delta) → DUPLICATE
+ *   DUPLICATE + delta  → updateDuplicate(dupQty+delta), or removeDuplicate+removeOwned if total hits 0
+ *
+ * Quick mode: single click applies ±1 immediately without an overlay.
+ * Sort order ALBUM: sections sorted by the lowest page number in the group.
+ *
+ * Badge counts (pending friend requests, unread messages) are fetched on mount
+ * and displayed on the header icons.
+ */
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';

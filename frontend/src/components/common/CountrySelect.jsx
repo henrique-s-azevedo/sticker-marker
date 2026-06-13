@@ -1,3 +1,14 @@
+/**
+ * Accessible combobox for selecting a country/team from a filterable list.
+ * Implements ARIA combobox pattern (role="combobox", role="listbox", aria-activedescendant).
+ * Keyboard support: ArrowDown/ArrowUp to navigate, Enter to select, Escape to close.
+ * Highlighted item is scrolled into view automatically.
+ *
+ * @param {{ value: string, label: string }[]} options - all available options
+ * @param {string} value - currently selected option value (team initial)
+ * @param {Function} onChange - called with the selected option value
+ * @param {string} placeholder
+ */
 import { useState, useRef, useEffect, useId } from 'react';
 import './CountrySelect.css';
 

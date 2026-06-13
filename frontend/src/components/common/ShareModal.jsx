@@ -1,3 +1,19 @@
+/**
+ * Modal for sharing the user's sticker list via WhatsApp, Telegram, Messenger, or clipboard.
+ *
+ * Flow:
+ *   1. User selects a category (MISSING, DUPLICATE, OWNED, or ALL).
+ *   2a. If mode is "whatsapp", opens WhatsApp directly with a pre-built message.
+ *   2b. Otherwise, shows a second step to choose the sharing platform.
+ *
+ * The shared text is formatted as team-grouped sticker codes (e.g. "BRA: 1, 3, 5").
+ * Teams are sorted by their lowest page number so the output matches the physical album order.
+ * Messenger does not support text pre-fill, so the text is copied to the clipboard first.
+ *
+ * @param {string} mode - "whatsapp" (skips platform step) | "general"
+ * @param {Object[]} stickers - all stickers with status and teamInitial fields
+ * @param {Function} onClose
+ */
 import { useState } from 'react';
 import './ShareModal.css';
 

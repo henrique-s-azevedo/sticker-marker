@@ -1,3 +1,19 @@
+/**
+ * Sell/buy proposal creation page (/sell/:friendId).
+ *
+ * Operates in two modes driven by location.state.mode:
+ *   "sell" — the current user is the seller (their duplicates that the friend needs)
+ *   "buy"  — the current user is the buyer (the friend's duplicates that they need)
+ *
+ * Sticker selection workflow:
+ *   1. User selects stickers from the available list.
+ *   2. User sets a per-unit price and clicks "Confirm selection" → adds a batch.
+ *   3. Confirmed stickers are removed from the available list (tracked via usedCodes).
+ *   4. Multiple batches allow tiered pricing (e.g. different prices for rare vs. common stickers).
+ *   5. "Finalize" submits all batches as a single proposal and navigates to the chat.
+ *
+ * Price validation: must be a number ≥ 0 (free transfers are allowed with price=0).
+ */
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 

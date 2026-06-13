@@ -1,3 +1,17 @@
+/**
+ * A grouped section of sticker cards for one team/prefix.
+ * Renders a header with the team flag, initials, and per-section completion percentage,
+ * followed by a grid of StickerCard components.
+ *
+ * Flag images are served as static assets under `public/flags/` (SVG for countries,
+ * WebP for the special FWC prefix).
+ *
+ * @param {string} prefix - team initial (e.g. "BRA")
+ * @param {Object[]} stickers - sticker objects for this section
+ * @param {Function} onSave - passed to each StickerCard; called with (sticker, delta)
+ * @param {boolean} quickMode
+ * @param {string} activeTab
+ */
 import StickerCard from './StickerCard';
 import './StickerSection.css';
 

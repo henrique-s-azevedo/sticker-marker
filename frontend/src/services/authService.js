@@ -1,3 +1,9 @@
+/**
+ * Authentication service — wraps the public /auth/* endpoints.
+ * These routes require no authorization header; the tokens they return
+ * are stored by AuthContext (access token in memory, refresh in localStorage).
+ */
+
 const BASE = `${import.meta.env.VITE_API_URL}/auth`;
 
 async function request(path, body) {
@@ -28,6 +34,7 @@ export function refreshTokens(refreshToken) {
   return request('/refresh', { refreshToken });
 }
 
+/** Authenticates using a Google ID token obtained from the frontend Google Sign-In SDK. */
 export function googleLogin(idToken) {
   return request('/google', { idToken });
 }

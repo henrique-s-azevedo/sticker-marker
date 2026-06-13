@@ -1,3 +1,14 @@
+/**
+ * Invite acceptance page — automatically processes an invite code from the URL.
+ *
+ * Accepts the code via POST /invite/:code/accept on mount.
+ * On success, redirects to /profile after 2 seconds.
+ * On failure (expired, already used, etc.), shows an error with a back link.
+ *
+ * Note: `token` is referenced from useAuth() but AuthContext does not expose a `token`
+ * field — the guard check will always treat the user as unauthenticated. The access token
+ * for the API call is obtained via getAccessToken() from AuthContext.
+ */
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';

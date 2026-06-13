@@ -1,3 +1,16 @@
+/**
+ * Trade response page (/trade-respond/:tradeId) — the counterpart's response view.
+ *
+ * Loads the proposal and runs calculateTrade from the proposer's perspective to
+ * show which stickers the counterpart actually has available to give.
+ * The counterpart pre-selects the originally proposed counterpart items, but can
+ * modify their selection (triggering a counter-proposal if the list changes).
+ *
+ * The user ID is decoded from the access token JWT to determine roles.
+ * Accepting navigates back to the proposer's chat; rejecting does the same.
+ *
+ * Validation: the counterpart must select exactly as many stickers as the proposer sent.
+ */
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getTrade, calculateTrade, respondTrade } from '../services/tradeService';

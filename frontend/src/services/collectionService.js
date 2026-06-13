@@ -1,3 +1,11 @@
+/**
+ * Collection service — manages sticker ownership and duplicate inventory
+ * for the authenticated user (all /me/* endpoints).
+ *
+ * The access token is retrieved from memory via getAccessToken(); no token
+ * is explicitly passed to avoid prop-drilling throughout the app.
+ */
+
 import { getAccessToken } from '../context/AuthContext';
 
 const API_BASE = import.meta.env.VITE_API_URL;
@@ -22,6 +30,7 @@ async function request(path, { method = 'GET', body } = {}) {
   return data;
 }
 
+/** Returns all stickers in the collection annotated with the user's ownership status. */
 export function fetchStickers(collectionId) {
   return request(`/collections/${collectionId}/me/stickers`);
 }
@@ -42,6 +51,7 @@ export function addDuplicate(stickerCode, quantity) {
   return request('/me/duplicates', { method: 'POST', body: { stickerCode, quantity } });
 }
 
+/** Sending quantity=0 deletes the duplicate record on the server side. */
 export function updateDuplicate(stickerCode, quantity) {
   return request(`/me/duplicates/${encodeURIComponent(stickerCode)}`, { method: 'PUT', body: { quantity } });
 }

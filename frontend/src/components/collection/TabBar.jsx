@@ -1,3 +1,11 @@
+/**
+ * Filter tabs for the collection view: ALL, MISSING, OWNED, DUPLICATE.
+ * Note: the OWNED tab shows both OWNED and DUPLICATE status stickers
+ * (any sticker the user has at least one copy of).
+ *
+ * @param {string} activeTab - currently active tab key
+ * @param {Function} onTabChange - called with the new tab key
+ */
 import './TabBar.css';
 
 const TABS = [

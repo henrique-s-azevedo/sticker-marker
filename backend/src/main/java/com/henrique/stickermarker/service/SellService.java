@@ -11,6 +11,27 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Orchestrates sticker sell proposals between friends.
+ *
+ * <p>The sell flow supports two directions:
+ * <ul>
+ *   <li>{@link #proposeSell} — seller initiates: "I want to sell you these stickers."</li>
+ *   <li>{@link #proposeBuy} — buyer initiates: "I want to buy these stickers from you."</li>
+ * </ul>
+ * Both paths create the same {@link SellProposal} model (seller=giver, buyer=receiver),
+ * but generate different system message types (SELL_PROPOSAL vs BUY_PROPOSAL) so the UI
+ * can display direction-appropriate wording.</p>
+ *
+ * <p>Sell lifecycle: {@code PENDING} → {@code COMPLETED} or {@code CANCELLED}.
+ * There is no multi-step negotiation — either party can directly complete or cancel.</p>
+ *
+ * <p>Stickers are grouped into price batches ({@link SellBatchDTO}) where each batch
+ * has a per-unit price. The {@code batchIndex} field on {@link SellProposalItem} preserves
+ * grouping when the proposal is reconstructed from the database.</p>
+ *
+ * <p>{@code COLLECTION_ID = 1L} is hardcoded because the system currently supports one album.</p>
+ */
 @Service
 @RequiredArgsConstructor
 public class SellService {
@@ -26,6 +47,15 @@ public class SellService {
     private final UserStickerRepository userStickerRepository;
     private final UserDuplicateRepository userDuplicateRepository;
 
+    /**
+     * Calculates which of the seller's duplicate stickers the buyer is missing.
+     * Used to pre-populate the sell proposal form from the seller's perspective.
+     *
+     * @param sellerId the potential seller's ID
+     * @param buyerId  the potential buyer's ID
+     * @return the available stickers the seller has that the buyer is missing
+     * @throws IllegalArgumentException if the users are not friends
+     */
     public SellCalculationDTO calculateSell(Long sellerId, Long buyerId) {
         if (!friendshipService.areFriends(sellerId, buyerId)) {
             throw new IllegalArgumentException("Não és amigo deste utilizador");
@@ -33,6 +63,15 @@ public class SellService {
         return buildCalculation(sellerId, buyerId);
     }
 
+    /**
+     * Calculates which of the seller's duplicate stickers the buyer is missing.
+     * Same as {@link #calculateSell} but called from the buyer's perspective.
+     *
+     * @param buyerId  the buyer initiating the calculation
+     * @param sellerId the potential seller's ID
+     * @return the available stickers the seller has that the buyer is missing
+     * @throws IllegalArgumentException if the users are not friends
+     */
     public SellCalculationDTO calculateBuy(Long buyerId, Long sellerId) {
         if (!friendshipService.areFriends(buyerId, sellerId)) {
             throw new IllegalArgumentException("Não és amigo deste utilizador");
@@ -40,6 +79,16 @@ public class SellService {
         return buildCalculation(sellerId, buyerId);
     }
 
+    /**
+     * Creates a sell proposal initiated by the seller.
+     * Side effect: sends a SELL_PROPOSAL system message to the buyer's conversation.
+     *
+     * @param sellerId the seller's ID
+     * @param buyerId  the buyer's ID
+     * @param dto      the batches of stickers and prices
+     * @return the created proposal with {@code PENDING} status
+     * @throws IllegalArgumentException if users are not friends or batches are invalid
+     */
     @Transactional
     public SellProposalDTO proposeSell(Long sellerId, Long buyerId, CreateSellDTO dto) {
         if (!friendshipService.areFriends(sellerId, buyerId)) {
@@ -59,6 +108,18 @@ public class SellService {
         return toDTO(saved);
     }
 
+    /**
+     * Creates a sell proposal initiated by the buyer.
+     * Roles are reversed: the buyer calls this but the resulting proposal has the
+     * friend as seller and the caller as buyer.
+     * Side effect: sends a BUY_PROPOSAL system message to the seller's conversation.
+     *
+     * @param buyerId  the buyer's ID (the initiator of this call)
+     * @param sellerId the seller's ID
+     * @param dto      the batches of stickers and prices
+     * @return the created proposal with {@code PENDING} status
+     * @throws IllegalArgumentException if users are not friends or batches are invalid
+     */
     @Transactional
     public SellProposalDTO proposeBuy(Long buyerId, Long sellerId, CreateSellDTO dto) {
         if (!friendshipService.areFriends(buyerId, sellerId)) {
@@ -78,6 +139,15 @@ public class SellService {
         return toDTO(saved);
     }
 
+    /**
+     * Marks a pending sell proposal as completed and transfers sticker inventory.
+     * Either participant (seller or buyer) may complete it once the physical transaction occurs.
+     *
+     * @param sellId the proposal to complete
+     * @param userId the user marking it done (must be seller or buyer)
+     * @return the updated proposal with {@code COMPLETED} status
+     * @throws IllegalArgumentException if the caller is not a participant or proposal is not PENDING
+     */
     @Transactional
     public SellProposalDTO completeSell(Long sellId, Long userId) {
         SellProposal proposal = getAndValidate(sellId);
@@ -101,6 +171,15 @@ public class SellService {
         return toDTO(sellProposalRepository.save(proposal));
     }
 
+    /**
+     * Cancels a pending sell proposal without any inventory changes.
+     * Either participant may cancel before completion.
+     *
+     * @param sellId the proposal to cancel
+     * @param userId the user cancelling (must be seller or buyer)
+     * @return the updated proposal with {@code CANCELLED} status
+     * @throws IllegalArgumentException if the caller is not a participant or proposal is not PENDING
+     */
     @Transactional
     public SellProposalDTO cancelSell(Long sellId, Long userId) {
         SellProposal proposal = getAndValidate(sellId);
@@ -114,6 +193,14 @@ public class SellService {
         return toDTO(sellProposalRepository.save(proposal));
     }
 
+    /**
+     * Returns a specific sell proposal. Only accessible to the seller or buyer.
+     *
+     * @param sellId the proposal ID
+     * @param userId the requesting user (must be a participant)
+     * @return the sell proposal DTO
+     * @throws IllegalArgumentException if the user is not a participant
+     */
     public SellProposalDTO getSell(Long sellId, Long userId) {
         SellProposal proposal = getAndValidate(sellId);
         boolean isParticipant = proposal.getSeller().getId().equals(userId)
@@ -122,8 +209,10 @@ public class SellService {
         return toDTO(proposal);
     }
 
-    // --- helpers ---
-
+    /**
+     * Computes the intersection of seller's duplicates and buyer's missing stickers.
+     * Always uses {@code COLLECTION_ID = 1L} as the current system only supports one album.
+     */
     private SellCalculationDTO buildCalculation(Long sellerId, Long buyerId) {
         User seller = userService.getById(sellerId);
         User buyer = userService.getById(buyerId);
@@ -155,6 +244,12 @@ public class SellService {
         return dto;
     }
 
+    /**
+     * Validates that the proposal has at least one non-empty batch with a non-negative price.
+     *
+     * @param batches the list of price batches to validate
+     * @throws IllegalArgumentException on any validation failure
+     */
     private void validateBatches(List<SellBatchDTO> batches) {
         if (batches == null || batches.isEmpty()) {
             throw new IllegalArgumentException("A proposta não tem cromos");
@@ -169,6 +264,10 @@ public class SellService {
         }
     }
 
+    /**
+     * Constructs the {@link SellProposal} entity from batches, assigning a {@code batchIndex}
+     * to each item so the original price groupings can be reconstructed when reading back.
+     */
     private SellProposal buildProposal(User seller, User buyer, List<SellBatchDTO> batches) {
         SellProposal proposal = new SellProposal();
         proposal.setSeller(seller);
@@ -190,6 +289,15 @@ public class SellService {
         return proposal;
     }
 
+    /**
+     * Builds the system message content for a sell or buy proposal notification.
+     * Lists each sticker with its price and appends the total.
+     *
+     * @param recipientName the name of the recipient (buyer or seller depending on direction)
+     * @param batches       the price batches from the proposal
+     * @param isSelling     {@code true} if the initiator is the seller; {@code false} if the buyer
+     * @return the formatted message string
+     */
     private String buildMessageContent(String recipientName, List<SellBatchDTO> batches, boolean isSelling) {
         StringBuilder sb = new StringBuilder();
         sb.append(recipientName).append(isSelling ? ", quero vender:\n" : ", quero comprar:\n");
@@ -208,6 +316,16 @@ public class SellService {
         return sb.toString();
     }
 
+    /**
+     * Transfers one unit of a sticker from the seller's duplicates to the buyer's inventory.
+     * Logic mirrors {@link TradeService#transferDuplicate}: decrement or delete giver's duplicate,
+     * then create owned or increment duplicate on the receiver side.
+     *
+     * @param giver    the seller (must have the sticker as a duplicate)
+     * @param receiver the buyer
+     * @param code     the sticker code to transfer
+     * @throws IllegalStateException if the giver does not have the sticker as a duplicate
+     */
     private void transferDuplicate(User giver, User receiver, String code) {
         var giverDup = userDuplicateRepository.findByUserAndSticker_Code(giver, code)
                 .orElseThrow(() -> new IllegalStateException(
@@ -248,6 +366,10 @@ public class SellService {
                 .orElseThrow(() -> new RuntimeException("Proposta não encontrada"));
     }
 
+    /**
+     * Reconstructs price batches from the flat item list by grouping on {@code batchIndex},
+     * then sorts by index to restore the original batch order.
+     */
     private SellProposalDTO toDTO(SellProposal p) {
         SellProposalDTO dto = new SellProposalDTO();
         dto.setId(p.getId());

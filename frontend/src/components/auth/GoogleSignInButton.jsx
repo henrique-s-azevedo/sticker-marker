@@ -1,3 +1,12 @@
+/**
+ * Renders the Google Sign-In button using the Google Identity Services SDK.
+ *
+ * The SDK is loaded via a <script> tag in index.html. If it is not yet available
+ * when this component mounts, initialization is deferred via `window.onGoogleLibraryLoad`.
+ * The `initialized` ref prevents double-initialization in React StrictMode.
+ *
+ * @param {Function} onError - called with an error message string if sign-in fails
+ */
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -42,6 +51,7 @@ export default function GoogleSignInButton({ onError }) {
     if (window.google?.accounts?.id) {
       init();
     } else {
+      // Defer until the SDK fires its load callback
       const prev = window.onGoogleLibraryLoad;
       window.onGoogleLibraryLoad = () => { prev?.(); init(); };
     }

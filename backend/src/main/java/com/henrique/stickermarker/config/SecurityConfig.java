@@ -23,6 +23,23 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Central Spring Security configuration for the application.
+ *
+ * <p>Key design decisions:
+ * <ul>
+ *   <li><strong>Stateless sessions</strong> — no HTTP session is created; every request is
+ *       authenticated independently via JWT, matching the SPA + mobile-ready architecture.</li>
+ *   <li><strong>CSRF disabled</strong> — safe because the API is stateless (no cookies for auth)
+ *       and CORS already restricts cross-origin requests to the configured origin.</li>
+ *   <li><strong>CORS origin from config</strong> — {@code app.cors.allowed-origins} is read from
+ *       environment variables, so local dev and production can use different origins without
+ *       code changes.</li>
+ *   <li><strong>JWT filter before UsernamePasswordAuthenticationFilter</strong> — ensures the
+ *       security context is populated from the token before Spring's default auth processing runs.</li>
+ * </ul>
+ * </p>
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -31,14 +48,27 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomUserDetailsService userDetailsService;
 
+    /** Comma-separated list of allowed CORS origins, injected from environment. */
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
 
+    /**
+     * Password encoder bean using BCrypt. Exposed as a bean so it can be injected
+     * wherever password hashing is needed (e.g. {@link com.henrique.stickermarker.service.AuthService}).
+     *
+     * @return BCrypt encoder with default strength (10 rounds)
+     */
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Authentication provider that delegates user lookup to {@link CustomUserDetailsService}
+     * and password verification to {@link BCryptPasswordEncoder}.
+     *
+     * @return configured DAO authentication provider
+     */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
@@ -46,11 +76,27 @@ public class SecurityConfig {
         return provider;
     }
 
+    /**
+     * Exposes the {@link AuthenticationManager} as a bean so it can be injected into
+     * {@link com.henrique.stickermarker.service.AuthService} for programmatic authentication
+     * during the login flow.
+     *
+     * @param config Spring's authentication configuration
+     * @return the authentication manager
+     * @throws Exception if the manager cannot be built
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
+    /**
+     * CORS configuration that allows the configured frontend origins to call the API.
+     * {@code allowCredentials} is intentionally {@code false} because authentication
+     * uses the {@code Authorization} header (Bearer token), not cookies.
+     *
+     * @return the CORS configuration source applied to all routes
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -63,6 +109,18 @@ public class SecurityConfig {
         return source;
     }
 
+    /**
+     * Defines the security filter chain applied to all HTTP requests.
+     *
+     * <p>Public routes ({@code /auth/**}, {@code /actuator/**}) are permitted without
+     * a token. All other routes require a valid JWT. A 401 is returned (rather than a
+     * redirect) because this is a REST API consumed by an SPA — redirect-based auth flows
+     * are not appropriate here.</p>
+     *
+     * @param http the {@link HttpSecurity} builder
+     * @return the configured security filter chain
+     * @throws Exception if the filter chain cannot be built
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

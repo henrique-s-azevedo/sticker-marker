@@ -1,3 +1,11 @@
+/**
+ * Dropdown for selecting the sticker section sort order.
+ * Available options: ALBUM (physical page order), AZ, ZA, MOST_COMPLETE, LEAST_COMPLETE.
+ * Closes on outside click via mousedown listener.
+ *
+ * @param {string} value - currently selected option key
+ * @param {Function} onChange - called with the new option key
+ */
 import { useState, useRef, useEffect } from 'react';
 import './SortDropdown.css';
 

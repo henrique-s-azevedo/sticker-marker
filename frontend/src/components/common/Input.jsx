@@ -1,3 +1,13 @@
+/**
+ * Styled text input with an optional show/hide toggle for password fields.
+ *
+ * @param {string} type - input type; "password" enables the toggle button
+ * @param {string} placeholder
+ * @param {string} value
+ * @param {Function} onChange
+ * @param {string} name
+ * @param {boolean} required
+ */
 import { useState } from 'react';
 import './Input.css';
 

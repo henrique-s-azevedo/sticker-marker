@@ -1,16 +1,6 @@
-/**
- * Invite acceptance page — automatically processes an invite code from the URL.
- *
- * Accepts the code via POST /invite/:code/accept on mount.
- * On success, redirects to /profile after 2 seconds.
- * On failure (expired, already used, etc.), shows an error with a back link.
- *
- * Note: `token` is referenced from useAuth() but AuthContext does not expose a `token`
- * field — the guard check will always treat the user as unauthenticated. The access token
- * for the API call is obtained via getAccessToken() from AuthContext.
- */
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
@@ -19,6 +9,7 @@ export default function InvitePage() {
   const { code }    = useParams();
   const navigate    = useNavigate();
   const { token }   = useAuth();
+  const { t }       = useTranslation();
   const [status, setStatus] = useState('loading');
   const [message, setMessage] = useState('');
 
@@ -39,7 +30,7 @@ export default function InvitePage() {
           throw new Error(d.message ?? 'Error accepting invite');
         }
         setStatus('success');
-        setMessage('Friend request sent!');
+        setMessage(t('invite.success'));
         setTimeout(() => navigate('/profile'), 2000);
       })
       .catch(e => {
@@ -50,18 +41,18 @@ export default function InvitePage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px', color: 'var(--color-text)' }}>
-      {status === 'loading' && <p>Processing invite...</p>}
+      {status === 'loading' && <p>{t('invite.processing')}</p>}
       {status === 'success' && (
         <>
           <p style={{ color: 'var(--color-stat-owned)', fontSize: '18px', fontWeight: 700 }}>✓ {message}</p>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '13px' }}>Redirecting to your profile...</p>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '13px' }}>{t('invite.redirecting')}</p>
         </>
       )}
       {status === 'error' && (
         <>
           <p style={{ color: 'var(--color-stat-missing)', fontSize: '16px' }}>{message}</p>
           <button onClick={() => navigate('/collection')} style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '8px 16px', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
-            Go to collection
+            {t('invite.go_collection')}
           </button>
         </>
       )}

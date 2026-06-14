@@ -1,30 +1,25 @@
-/**
- * Filter tabs for the collection view: ALL, MISSING, OWNED, DUPLICATE.
- * Note: the OWNED tab shows both OWNED and DUPLICATE status stickers
- * (any sticker the user has at least one copy of).
- *
- * @param {string} activeTab - currently active tab key
- * @param {Function} onTabChange - called with the new tab key
- */
+import { useTranslation } from 'react-i18next';
 import './TabBar.css';
 
-const TABS = [
-  { key: 'ALL', label: 'All' },
-  { key: 'MISSING', label: 'Missing' },
-  { key: 'OWNED', label: 'Owned' },
-  { key: 'DUPLICATE', label: 'Duplicates' },
+const TAB_KEYS = [
+  { key: 'ALL',       tKey: 'tabs.all' },
+  { key: 'MISSING',   tKey: 'tabs.missing' },
+  { key: 'OWNED',     tKey: 'tabs.owned' },
+  { key: 'DUPLICATE', tKey: 'tabs.duplicates' },
 ];
 
 export default function TabBar({ activeTab, onTabChange }) {
+  const { t } = useTranslation();
+
   return (
     <div className="tab-bar">
-      {TABS.map(tab => (
+      {TAB_KEYS.map(tab => (
         <button
           key={tab.key}
           className={`tab-bar__tab${activeTab === tab.key ? ' tab-bar__tab--active' : ''}`}
           onClick={() => onTabChange(tab.key)}
         >
-          {tab.label}
+          {t(tab.tKey)}
         </button>
       ))}
     </div>

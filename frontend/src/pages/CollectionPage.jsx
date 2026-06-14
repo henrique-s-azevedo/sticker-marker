@@ -1,27 +1,9 @@
 /**
  * Main collection page — the primary screen after login.
- *
- * Responsibilities:
- *   - Loads all stickers and progress for collection 1 (hardcoded, single-album system).
- *   - Applies tab, search, country, and sort filters entirely client-side after the initial load.
- *   - Handles sticker ownership mutations (markOwned, removeOwned, addDuplicate,
- *     updateDuplicate, removeDuplicate) and optimistically updates local state.
- *
- * Sticker state transitions (all orchestrated in handleSave):
- *   MISSING + delta=1  → markOwned → OWNED
- *   MISSING + delta>1  → markOwned + addDuplicate(delta-1) → DUPLICATE
- *   OWNED + delta=-1   → removeOwned → MISSING
- *   OWNED + delta>0    → addDuplicate(delta) → DUPLICATE
- *   DUPLICATE + delta  → updateDuplicate(dupQty+delta), or removeDuplicate+removeOwned if total hits 0
- *
- * Quick mode: single click applies ±1 immediately without an overlay.
- * Sort order ALBUM: sections sorted by the lowest page number in the group.
- *
- * Badge counts (pending friend requests, unread messages) are fetched on mount
- * and displayed on the header icons.
  */
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import {
   fetchStickers, fetchProgress,
@@ -54,6 +36,7 @@ function groupByPrefix(stickers) {
 export default function CollectionPage() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [stickers, setStickers] = useState([]);
   const [progress, setProgress] = useState(null);
@@ -199,13 +182,13 @@ export default function CollectionPage() {
     <>
     <div className="collection-page">
       <header className="collection-page__header">
-        <h1 className="collection-page__title">Panini WC 2026 Album</h1>
+        <h1 className="collection-page__title">{t('collection.title')}</h1>
         <div className="collection-page__header-actions">
           <button
             className="collection-page__profile-btn"
             onClick={() => navigate('/profile', { state: { tab: 'messages' } })}
-            title="Messages"
-            aria-label="Messages"
+            title={t('collection.messages')}
+            aria-label={t('collection.messages')}
           >
             <ChatIcon />
             {unreadMessages > 0 && (
@@ -215,8 +198,8 @@ export default function CollectionPage() {
           <button
             className="collection-page__profile-btn"
             onClick={() => navigate('/profile')}
-            title="Profile"
-            aria-label="Profile"
+            title={t('collection.profile')}
+            aria-label={t('collection.profile')}
           >
             <ProfileIcon />
             {pendingCount > 0 && (
@@ -224,13 +207,13 @@ export default function CollectionPage() {
             )}
           </button>
           <button className="collection-page__logout" onClick={handleLogout}>
-            Sign out
+            {t('collection.sign_out')}
           </button>
         </div>
       </header>
 
       <main className="collection-page__main">
-        {loading && <p className="collection-page__status">Loading...</p>}
+        {loading && <p className="collection-page__status">{t('collection.loading')}</p>}
         {error && <p className="collection-page__status collection-page__status--error">{error}</p>}
 
         {!loading && !error && (
@@ -254,7 +237,6 @@ export default function CollectionPage() {
                     options={countryOptions}
                     value={null}
                     onChange={handleCountrySelect}
-                    placeholder="Filter by country..."
                   />
                 </div>
                 {selectedCountries.length > 0 && (
@@ -262,35 +244,35 @@ export default function CollectionPage() {
                     className="collection-page__reset"
                     onClick={() => setSelectedCountries([])}
                   >
-                    Clear filters
+                    {t('collection.clear_filters')}
                   </button>
                 )}
                 <div className="collection-page__share-icons">
                   <button
                     className={`collection-page__quick-toggle${quickMode ? ' collection-page__quick-toggle--active' : ''}`}
                     onClick={() => setQuickMode(q => !q)}
-                    title="Quick mode"
-                    aria-label="Quick mode"
+                    title={t('collection.quick_mode')}
+                    aria-label={t('collection.quick_mode')}
                     aria-pressed={quickMode}
                   >
                     <span className="collection-page__quick-track">
                       <span className="collection-page__quick-thumb" />
                     </span>
-                    <span className="collection-page__quick-label">Quick</span>
+                    <span className="collection-page__quick-label">{t('collection.quick')}</span>
                   </button>
                   <button
                     className="collection-page__share-btn collection-page__share-btn--whatsapp"
                     onClick={() => setShareMode('whatsapp')}
-                    title="Share on WhatsApp"
-                    aria-label="Share on WhatsApp"
+                    title={t('collection.share_whatsapp')}
+                    aria-label={t('collection.share_whatsapp')}
                   >
                     <WhatsAppIcon />
                   </button>
                   <button
                     className="collection-page__share-btn"
                     onClick={() => setShareMode('general')}
-                    title="Share"
-                    aria-label="Share"
+                    title={t('collection.share')}
+                    aria-label={t('collection.share')}
                   >
                     <ShareIcon />
                   </button>
@@ -330,7 +312,7 @@ export default function CollectionPage() {
                 />
               ))}
               {sortedSections.length === 0 && (
-                <p className="collection-page__empty">No stickers in this tab.</p>
+                <p className="collection-page__empty">{t('collection.empty')}</p>
               )}
             </div>
           </>

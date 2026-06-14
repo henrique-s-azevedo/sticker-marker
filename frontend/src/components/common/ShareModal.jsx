@@ -1,28 +1,6 @@
-/**
- * Modal for sharing the user's sticker list via WhatsApp, Telegram, Messenger, or clipboard.
- *
- * Flow:
- *   1. User selects a category (MISSING, DUPLICATE, OWNED, or ALL).
- *   2a. If mode is "whatsapp", opens WhatsApp directly with a pre-built message.
- *   2b. Otherwise, shows a second step to choose the sharing platform.
- *
- * The shared text is formatted as team-grouped sticker codes (e.g. "BRA: 1, 3, 5").
- * Teams are sorted by their lowest page number so the output matches the physical album order.
- * Messenger does not support text pre-fill, so the text is copied to the clipboard first.
- *
- * @param {string} mode - "whatsapp" (skips platform step) | "general"
- * @param {Object[]} stickers - all stickers with status and teamInitial fields
- * @param {Function} onClose
- */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './ShareModal.css';
-
-const CATEGORIES = [
-  { id: 'MISSING',   label: 'Missing' },
-  { id: 'DUPLICATE', label: 'Duplicates' },
-  { id: 'OWNED',     label: 'Owned' },
-  { id: 'ALL',       label: 'All' },
-];
 
 const FLAG_EMOJI = {
   ALG: '🇩🇿', ARG: '🇦🇷', AUS: '🇦🇺', AUT: '🇦🇹', BEL: '🇧🇪',
@@ -46,9 +24,9 @@ function getSubset(stickers, categoryId) {
   }
 }
 
-function buildSection(stickers, categoryId) {
+function buildSection(stickers, categoryId, noneLabel) {
   const subset = getSubset(stickers, categoryId);
-  if (subset.length === 0) return '(none)';
+  if (subset.length === 0) return noneLabel;
 
   const groups = {};
   for (const s of subset) {
@@ -70,26 +48,35 @@ function buildSection(stickers, categoryId) {
     .join('\n');
 }
 
-function buildMessage(stickers, categoryId, categoryLabel) {
-  const mainSection = buildSection(stickers, categoryId);
-  const ownedSection  = buildSection(stickers, 'OWNED');
-  const missingSection = buildSection(stickers, 'MISSING');
-  const dupSection    = buildSection(stickers, 'DUPLICATE');
+function buildMessage(stickers, categoryId, categoryLabel, t) {
+  const none = t('share.none');
+  const mainSection = buildSection(stickers, categoryId, none);
+  const ownedSection   = buildSection(stickers, 'OWNED', none);
+  const missingSection = buildSection(stickers, 'MISSING', none);
+  const dupSection     = buildSection(stickers, 'DUPLICATE', none);
 
   return [
     `WC 2026 - ${categoryLabel}`,
     mainSection,
     '',
-    `Owned:\n${ownedSection}`,
-    `Missing:\n${missingSection}`,
-    `Duplicates:\n${dupSection}`,
+    `${t('share.msg_owned')}:\n${ownedSection}`,
+    `${t('share.msg_missing')}:\n${missingSection}`,
+    `${t('share.msg_duplicates')}:\n${dupSection}`,
   ].join('\n');
 }
 
 export default function ShareModal({ mode, stickers, onClose }) {
-  const [step, setStep]           = useState('category');
-  const [category, setCategory]   = useState(null);
-  const [feedback, setFeedback]   = useState('');
+  const { t } = useTranslation();
+  const [step, setStep]         = useState('category');
+  const [category, setCategory] = useState(null);
+  const [feedback, setFeedback] = useState('');
+
+  const CATEGORIES = [
+    { id: 'MISSING',   label: t('share.cat_missing') },
+    { id: 'DUPLICATE', label: t('share.cat_duplicates') },
+    { id: 'OWNED',     label: t('share.cat_owned') },
+    { id: 'ALL',       label: t('share.cat_all') },
+  ];
 
   function showFeedback(msg) {
     setFeedback(msg);
@@ -98,7 +85,7 @@ export default function ShareModal({ mode, stickers, onClose }) {
 
   function handleCategoryClick(cat) {
     if (mode === 'whatsapp') {
-      const msg = buildMessage(stickers, cat.id, cat.label);
+      const msg = buildMessage(stickers, cat.id, cat.label, t);
       window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
       onClose();
     } else {
@@ -108,33 +95,33 @@ export default function ShareModal({ mode, stickers, onClose }) {
   }
 
   async function handleCopy() {
-    const msg = buildMessage(stickers, category.id, category.label);
+    const msg = buildMessage(stickers, category.id, category.label, t);
     try {
       await navigator.clipboard.writeText(msg);
-      showFeedback('Text copied!');
+      showFeedback(t('share.copied'));
     } catch {
-      showFeedback('Could not copy.');
+      showFeedback(t('share.copy_failed'));
     }
   }
 
   function handleTelegram() {
-    const msg = buildMessage(stickers, category.id, category.label);
+    const msg = buildMessage(stickers, category.id, category.label, t);
     const url = encodeURIComponent(window.location.href);
     window.open(`https://t.me/share/url?url=${url}&text=${encodeURIComponent(msg)}`, '_blank');
     onClose();
   }
 
   async function handleMessenger() {
-    const msg = buildMessage(stickers, category.id, category.label);
+    const msg = buildMessage(stickers, category.id, category.label, t);
     try {
       await navigator.clipboard.writeText(msg);
     } catch { /* ignore */ }
     window.open('https://www.messenger.com/', '_blank');
-    showFeedback('Text copied! Paste in Messenger.');
+    showFeedback(t('share.messenger_copied'));
   }
 
   async function handleWebShare() {
-    const msg = buildMessage(stickers, category.id, category.label);
+    const msg = buildMessage(stickers, category.id, category.label, t);
     try {
       await navigator.share({ text: msg });
       onClose();
@@ -151,9 +138,9 @@ export default function ShareModal({ mode, stickers, onClose }) {
         {step === 'category' && (
           <>
             <h2 className="share-modal__title">
-              {mode === 'whatsapp' ? 'Share on WhatsApp' : 'Share'}
+              {mode === 'whatsapp' ? t('share.whatsapp_title') : t('share.title')}
             </h2>
-            <p className="share-modal__subtitle">What do you want to share?</p>
+            <p className="share-modal__subtitle">{t('share.what')}</p>
             <div className="share-modal__categories">
               {CATEGORIES.map(cat => (
                 <button
@@ -171,27 +158,27 @@ export default function ShareModal({ mode, stickers, onClose }) {
         {step === 'platform' && category && (
           <>
             <button className="share-modal__back" onClick={() => setStep('category')}>
-              ← Back
+              {t('share.back')}
             </button>
             <h2 className="share-modal__title">{category.label}</h2>
-            <p className="share-modal__subtitle">How do you want to share?</p>
+            <p className="share-modal__subtitle">{t('share.how')}</p>
             <div className="share-modal__platforms">
               <button className="share-modal__platform-btn" onClick={handleCopy}>
                 <ClipboardIcon />
-                Copy text
+                {t('share.copy_text')}
               </button>
               <button className="share-modal__platform-btn share-modal__platform-btn--messenger" onClick={handleMessenger}>
                 <MessengerIcon />
-                Messenger
+                {t('share.messenger')}
               </button>
               <button className="share-modal__platform-btn share-modal__platform-btn--telegram" onClick={handleTelegram}>
                 <TelegramIcon />
-                Telegram
+                {t('share.telegram')}
               </button>
               {typeof navigator !== 'undefined' && navigator.share && (
                 <button className="share-modal__platform-btn" onClick={handleWebShare}>
                   <NativeShareIcon />
-                  More options
+                  {t('share.more')}
                 </button>
               )}
             </div>

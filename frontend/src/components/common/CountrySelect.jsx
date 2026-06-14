@@ -1,23 +1,15 @@
-/**
- * Accessible combobox for selecting a country/team from a filterable list.
- * Implements ARIA combobox pattern (role="combobox", role="listbox", aria-activedescendant).
- * Keyboard support: ArrowDown/ArrowUp to navigate, Enter to select, Escape to close.
- * Highlighted item is scrolled into view automatically.
- *
- * @param {{ value: string, label: string }[]} options - all available options
- * @param {string} value - currently selected option value (team initial)
- * @param {Function} onChange - called with the selected option value
- * @param {string} placeholder
- */
 import { useState, useRef, useEffect, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 import './CountrySelect.css';
 
 export default function CountrySelect({
   options = [],
   value,
   onChange,
-  placeholder = 'Select country...',
+  placeholder,
 }) {
+  const { t } = useTranslation();
+  const resolvedPlaceholder = placeholder ?? t('collection.filter_country');
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -105,14 +97,12 @@ export default function CountrySelect({
     }
   }
 
-  // Scroll highlighted item into view
   useEffect(() => {
     if (open && highlightedIndex >= 0 && listRef.current) {
       listRef.current.children[highlightedIndex]?.scrollIntoView({ block: 'nearest' });
     }
   }, [highlightedIndex, open]);
 
-  // Close on outside click
   useEffect(() => {
     function onMouseDown(e) {
       if (!containerRef.current?.contains(e.target)) closeDropdown();
@@ -124,10 +114,7 @@ export default function CountrySelect({
   const displayValue = open ? query : (selected?.label ?? '');
 
   return (
-    <div
-      className="country-select"
-      ref={containerRef}
-    >
+    <div className="country-select" ref={containerRef}>
       <div className={`country-select__control${open ? ' country-select__control--open' : ''}`}>
         <input
           ref={inputRef}
@@ -135,7 +122,7 @@ export default function CountrySelect({
           className="country-select__input"
           type="text"
           value={displayValue}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           onChange={handleInputChange}
           onFocus={openDropdown}
           onKeyDown={handleKeyDown}
@@ -154,7 +141,7 @@ export default function CountrySelect({
           className={`country-select__arrow${open ? ' country-select__arrow--open' : ''}`}
           onClick={handleToggleClick}
           tabIndex={-1}
-          aria-label={open ? 'Close list' : 'Open list'}
+          aria-label={open ? t('country.close') : t('country.open')}
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
             <path d="M2.5 5l4.5 4 4.5-4" stroke="currentColor" strokeWidth="1.8"
@@ -172,7 +159,7 @@ export default function CountrySelect({
           aria-label="Countries"
         >
           {filtered.length === 0 ? (
-            <li className="country-select__empty">No results</li>
+            <li className="country-select__empty">{t('country.no_results')}</li>
           ) : (
             filtered.map((option, i) => (
               <li

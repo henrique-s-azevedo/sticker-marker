@@ -1,21 +1,16 @@
-/**
- * Renders the Google Sign-In button using the Google Identity Services SDK.
- *
- * The SDK is loaded via a <script> tag in index.html. If it is not yet available
- * when this component mounts, initialization is deferred via `window.onGoogleLibraryLoad`.
- * The `initialized` ref prevents double-initialization in React StrictMode.
- *
- * @param {Function} onError - called with an error message string if sign-in fails
- */
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { googleLogin } from '../../services/authService';
 
-export default function GoogleSignInButton({ onError }) {
+const LOCALE_MAP = { en: 'en', pt: 'pt-PT' };
+
+export default function GoogleSignInButton({ onError, locale = 'en' }) {
   const containerRef = useRef(null);
   const { saveSession } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const initialized = useRef(false);
 
   useEffect(() => {
@@ -35,7 +30,7 @@ export default function GoogleSignInButton({ onError }) {
             saveSession(data.accessToken, data.refreshToken);
             navigate('/collection');
           } catch (e) {
-            onError?.(e.message || 'Google login failed');
+            onError?.(e.message || t('login.google_failed'));
           }
         },
       });
@@ -45,13 +40,13 @@ export default function GoogleSignInButton({ onError }) {
         size: 'large',
         text: 'continue_with',
         width,
+        locale: LOCALE_MAP[locale] ?? 'en',
       });
     }
 
     if (window.google?.accounts?.id) {
       init();
     } else {
-      // Defer until the SDK fires its load callback
       const prev = window.onGoogleLibraryLoad;
       window.onGoogleLibraryLoad = () => { prev?.(); init(); };
     }

@@ -1,23 +1,5 @@
-/**
- * Individual sticker card with two interaction modes:
- *
- * Normal mode: clicking opens an inline overlay with +/- counter and a Save button.
- *   The delta is relative to the current total (MISSING=0, OWNED=1, DUPLICATE=1+duplicateCount).
- *   Saving with delta=0 is a no-op.
- *
- * Quick mode: clicking immediately applies +1 (for MISSING tab) or -1 (for OWNED/DUPLICATE tab),
- *   with a brief CSS flash animation for feedback. Useful for bulk entry.
- *
- * The parent (StickerSection → CollectionPage) handles the actual API calls via `onSave(delta)`.
- *
- * @param {string} code - sticker code (e.g. "BRA1")
- * @param {string} status - "MISSING" | "OWNED" | "DUPLICATE"
- * @param {number} duplicateCount - number of extra copies (only meaningful when DUPLICATE)
- * @param {Function} onSave - called with a numeric delta when the user saves
- * @param {boolean} quickMode - enables single-click mode
- * @param {string} activeTab - current tab; determines quick-mode direction
- */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import defaultSticker from '../../assets/images/default-sticker.jpg';
 import './StickerCard.css';
 
@@ -28,6 +10,7 @@ function currentTotal(status, duplicateCount) {
 }
 
 export default function StickerCard({ code, status, duplicateCount, onSave, quickMode, activeTab }) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [delta, setDelta] = useState(0);
   const [flash, setFlash] = useState(null);
@@ -90,7 +73,7 @@ export default function StickerCard({ code, status, duplicateCount, onSave, quic
               >+</button>
             </div>
             <button className="sticker-card__overlay-save" onClick={handleSave}>
-              Guardar
+              {t('sticker.save')}
             </button>
           </div>
         )}

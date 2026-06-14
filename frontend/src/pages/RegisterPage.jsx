@@ -1,14 +1,11 @@
-/**
- * Registration page — first/last name, email, password, and Google Sign-In.
- * The display name sent to the API is formed by joining firstName and lastName.
- * On success, calls saveSession() and navigates to /collection.
- */
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import AuthLayout from '../components/auth/AuthLayout';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
+import LanguageToggle from '../components/common/LanguageToggle';
 import { register } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 import './RegisterPage.css';
@@ -16,6 +13,7 @@ import './RegisterPage.css';
 export default function RegisterPage() {
   const { saveSession } = useAuth();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -49,23 +47,23 @@ export default function RegisterPage() {
   return (
     <AuthLayout>
       <div className="auth-form">
-        <h1 className="auth-form__title">Create an account</h1>
+        <h1 className="auth-form__title">{t('register.title')}</h1>
         <p className="auth-form__subtitle">
-          Already have an account? <Link to="/login">Log in</Link>
+          {t('register.have_account')} <Link to="/login">{t('register.log_in')}</Link>
         </p>
 
         <form className="auth-form__fields" onSubmit={handleSubmit}>
           <div className="auth-form__row">
             <Input
               name="firstName"
-              placeholder="First name"
+              placeholder={t('register.first_name')}
               value={form.firstName}
               onChange={handleChange}
               required
             />
             <Input
               name="lastName"
-              placeholder="Last name"
+              placeholder={t('register.last_name')}
               value={form.lastName}
               onChange={handleChange}
               required
@@ -75,7 +73,7 @@ export default function RegisterPage() {
           <Input
             name="email"
             type="email"
-            placeholder="Email"
+            placeholder={t('login.email')}
             value={form.email}
             onChange={handleChange}
             required
@@ -84,7 +82,7 @@ export default function RegisterPage() {
           <Input
             name="password"
             type="password"
-            placeholder="Enter your password"
+            placeholder={t('login.password')}
             value={form.password}
             onChange={handleChange}
             required
@@ -93,17 +91,19 @@ export default function RegisterPage() {
           {error && <p className="auth-form__error">{error}</p>}
 
           <Button type="submit" fullWidth disabled={loading}>
-            {loading ? 'A criar conta...' : 'Create account'}
+            {loading ? t('register.loading') : t('register.submit')}
           </Button>
         </form>
 
         <div className="auth-form__divider">
-          <span>Or register with</span>
+          <span>{t('register.or_register')}</span>
         </div>
 
         <div className="auth-form__social">
-          <GoogleSignInButton onError={setError} />
+          <GoogleSignInButton key={i18n.language} locale={i18n.language} onError={setError} />
         </div>
+
+        <LanguageToggle />
       </div>
     </AuthLayout>
   );

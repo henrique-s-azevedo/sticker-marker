@@ -1,21 +1,15 @@
 /**
  * Entry-point modal for trade/sell interactions with a specific friend.
- * Presents three options: sticker-for-sticker trade, sell, or buy.
- *
- * "Sticker for sticker" calculates the mutual trade opportunities inline and shows
- * the result before navigating to /trade/:friendId. The other options navigate
- * directly to /sell/:friendId with a mode flag in location state.
- *
- * @param {{ id: number, displayName: string }} friend
- * @param {Function} onClose
  */
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { calculateTrade } from '../../services/tradeService';
 import './TradeOptionsModal.css';
 
 export default function TradeOptionsModal({ friend, onClose }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
@@ -41,7 +35,7 @@ export default function TradeOptionsModal({ friend, onClose }) {
   return (
     <div className="trade-modal__overlay" onClick={onClose}>
       <div className="trade-modal" onClick={e => e.stopPropagation()}>
-        <h2 className="trade-modal__title">Trades with {friend.displayName}</h2>
+        <h2 className="trade-modal__title">{t('trade_modal.title', { name: friend.displayName })}</h2>
 
         {!result ? (
           <div className="trade-modal__options">
@@ -52,8 +46,8 @@ export default function TradeOptionsModal({ friend, onClose }) {
             >
               <span className="trade-modal__option-icon">🔄</span>
               <div>
-                <p className="trade-modal__option-title">Sticker for sticker</p>
-                <p className="trade-modal__option-desc">See the stickers you can swap with each other</p>
+                <p className="trade-modal__option-title">{t('trade_modal.sticker_for_sticker')}</p>
+                <p className="trade-modal__option-desc">{t('trade_modal.sticker_desc')}</p>
               </div>
             </button>
 
@@ -63,8 +57,8 @@ export default function TradeOptionsModal({ friend, onClose }) {
             >
               <span className="trade-modal__option-icon">💰</span>
               <div>
-                <p className="trade-modal__option-title">Sell</p>
-                <p className="trade-modal__option-desc">Sell your duplicates to this friend</p>
+                <p className="trade-modal__option-title">{t('trade_modal.sell')}</p>
+                <p className="trade-modal__option-desc">{t('trade_modal.sell_desc')}</p>
               </div>
             </button>
 
@@ -74,8 +68,8 @@ export default function TradeOptionsModal({ friend, onClose }) {
             >
               <span className="trade-modal__option-icon">🛒</span>
               <div>
-                <p className="trade-modal__option-title">Buy</p>
-                <p className="trade-modal__option-desc">Buy duplicates from this friend</p>
+                <p className="trade-modal__option-title">{t('trade_modal.buy')}</p>
+                <p className="trade-modal__option-desc">{t('trade_modal.buy_desc')}</p>
               </div>
             </button>
           </div>
@@ -83,35 +77,34 @@ export default function TradeOptionsModal({ friend, onClose }) {
           <div className="trade-modal__result">
             {result.maxTrades === 0 ? (
               <div className="trade-modal__no-trades">
-                <p>No trades possible at the moment.</p>
+                <p>{t('trade_modal.no_trades')}</p>
                 <p className="trade-modal__sub">
                   {result.myOfferings.length === 0
-                    ? 'You have no duplicates your friend needs.'
-                    : 'Your friend has no duplicates you need.'}
+                    ? t('trade_modal.no_my_offer')
+                    : t('trade_modal.no_friend_offer')}
                 </p>
               </div>
             ) : (
               <div className="trade-modal__trades-found">
                 <p className="trade-modal__count">
-                  <strong>{result.maxTrades}</strong> possible sticker-for-sticker trade{result.maxTrades !== 1 ? 's' : ''}
+                  <strong>{t('trade_modal.count', { count: result.maxTrades })}</strong>
                 </p>
                 <p className="trade-modal__sub">
-                  You have {result.myOfferings.length} sticker{result.myOfferings.length !== 1 ? 's' : ''} to offer
-                  and can receive {result.friendOfferings.length}.
+                  {t('trade_modal.offer_sub', { count: result.myOfferings.length, receive: result.friendOfferings.length })}
                 </p>
                 <button className="trade-modal__btn-primary" onClick={handleGoToTrade}>
-                  View and propose trade
+                  {t('trade_modal.view_propose')}
                 </button>
               </div>
             )}
-            <button className="trade-modal__btn-back" onClick={() => setResult(null)}>← Back</button>
+            <button className="trade-modal__btn-back" onClick={() => setResult(null)}>{t('trade_modal.back')}</button>
           </div>
         )}
 
         {error && <p className="trade-modal__error">{error}</p>}
-        {loading && <p className="trade-modal__loading">Calculating...</p>}
+        {loading && <p className="trade-modal__loading">{t('trade_modal.calculating')}</p>}
 
-        <button className="trade-modal__close" onClick={onClose}>Close</button>
+        <button className="trade-modal__close" onClick={onClose}>{t('trade_modal.close')}</button>
       </div>
     </div>
   );

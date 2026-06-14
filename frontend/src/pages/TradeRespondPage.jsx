@@ -1,18 +1,9 @@
 /**
- * Trade response page (/trade-respond/:tradeId) — the counterpart's response view.
- *
- * Loads the proposal and runs calculateTrade from the proposer's perspective to
- * show which stickers the counterpart actually has available to give.
- * The counterpart pre-selects the originally proposed counterpart items, but can
- * modify their selection (triggering a counter-proposal if the list changes).
- *
- * The user ID is decoded from the access token JWT to determine roles.
- * Accepting navigates back to the proposer's chat; rejecting does the same.
- *
- * Validation: the counterpart must select exactly as many stickers as the proposer sent.
+ * Trade response page (/trade-respond/:tradeId).
  */
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getTrade, calculateTrade, respondTrade } from '../services/tradeService';
 import { getAccessToken } from '../context/AuthContext';
 import './TradePage.css';
@@ -20,6 +11,7 @@ import './TradePage.css';
 export default function TradeRespondPage() {
   const { tradeId } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [trade, setTrade] = useState(null);
   const [calc, setCalc] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -42,9 +34,7 @@ export default function TradeRespondPage() {
     getTrade(Number(tradeId))
       .then(async t => {
         setTrade(t);
-        // Pre-select the original counterpart items
         setSelectedOffer(new Set(t.counterpartItems.map(s => s.code)));
-        // Load available offerings from counterpart's perspective
         const calc = await calculateTrade(t.proposerId).catch(() => null);
         setCalc(calc);
       })
@@ -72,7 +62,7 @@ export default function TradeRespondPage() {
     }
   }
 
-  if (loading) return <div className="trade-page__status">Loading...</div>;
+  if (loading) return <div className="trade-page__status">{t('trade.loading')}</div>;
   if (error && !trade) return <div className="trade-page__status trade-page__status--error">{error}</div>;
   if (!trade) return null;
 
@@ -86,21 +76,21 @@ export default function TradeRespondPage() {
       <header className="trade-page__header">
         <button className="trade-page__back" onClick={() => navigate(`/chat/${trade.proposerId}`)}>←</button>
         <div>
-          <h1 className="trade-page__title">Trade proposal</h1>
-          <p className="trade-page__subtitle">de @{trade.proposerUserTag}</p>
+          <h1 className="trade-page__title">{t('trade_respond.title')}</h1>
+          <p className="trade-page__subtitle">{t('trade_respond.from', { tag: trade.proposerUserTag })}</p>
         </div>
       </header>
 
       <div className="trade-page__counter">
         <span className={`trade-page__count ${valid ? 'trade-page__count--ok' : 'trade-page__count--warn'}`}>
-          Select {requiredCount} sticker{requiredCount !== 1 ? 's' : ''} to give · selected: {offerCount}
+          {t('trade_respond.select', { count: requiredCount, selected: offerCount })}
         </span>
       </div>
 
       <div className="trade-page__columns">
         <div className="trade-page__column">
           <h2 className="trade-page__col-title">
-            You will receive from @{trade.proposerUserTag}
+            {t('trade_respond.receive_from', { tag: trade.proposerUserTag })}
           </h2>
           {trade.proposerItems.map(s => (
             <div key={s.code} className="trade-page__sticker" style={{ cursor: 'default' }}>
@@ -114,8 +104,8 @@ export default function TradeRespondPage() {
 
         <div className="trade-page__column">
           <h2 className="trade-page__col-title">
-            You will give to @{trade.proposerUserTag}
-            <span className="trade-page__col-tag">select {requiredCount}</span>
+            {t('trade_respond.give_to', { tag: trade.proposerUserTag })}
+            <span className="trade-page__col-tag">{t('trade_respond.select_n', { count: requiredCount })}</span>
           </h2>
           {availableOfferings.length === 0 && trade.counterpartItems.map(s => (
             <button
@@ -152,14 +142,14 @@ export default function TradeRespondPage() {
           onClick={() => handleRespond(true)}
           disabled={!valid || sending}
         >
-          {sending ? 'Sending...' : 'Accept trade'}
+          {sending ? t('trade_respond.sending') : t('trade_respond.accept')}
         </button>
         <button
           className="trade-page__btn-cancel"
           onClick={() => handleRespond(false)}
           disabled={sending}
         >
-          Reject
+          {t('trade_respond.reject')}
         </button>
       </div>
     </div>

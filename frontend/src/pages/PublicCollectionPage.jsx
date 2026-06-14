@@ -1,13 +1,9 @@
 /**
- * Read-only view of a friend's sticker collection, accessible via /collection/:userTag.
- * Visibility is enforced server-side; this page does not allow any ownership mutations.
- *
- * Shares most layout components with CollectionPage but omits the StickerCard interaction
- * (onSave is a no-op) and removes the share/quick-mode toolbar.
- * COLLECTION_ID is hardcoded to 1 (single-album system).
+ * Read-only view of a friend's sticker collection.
  */
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getFriendStickers, getFriendProgress } from '../services/friendshipService';
 import StatsBar from '../components/collection/StatsBar';
 import TabBar from '../components/collection/TabBar';
@@ -29,6 +25,7 @@ function groupByPrefix(stickers) {
 export default function PublicCollectionPage() {
   const { userTag }      = useParams();
   const navigate         = useNavigate();
+  const { t }            = useTranslation();
   const [stickers, setStickers]   = useState([]);
   const [progress, setProgress]   = useState(null);
   const [activeTab, setActiveTab] = useState('ALL');
@@ -67,16 +64,16 @@ export default function PublicCollectionPage() {
           style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '4px 12px', color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)', cursor: 'pointer' }}
           onClick={() => navigate(-1)}
         >
-          ← Back
+          {t('public.back')}
         </button>
         <h1 className="collection-page__title">@{userTag} · WC 2026</h1>
         <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', padding: '4px 8px', border: '1px solid var(--color-border)', borderRadius: '999px' }}>
-          Read only
+          {t('public.read_only')}
         </span>
       </header>
 
       <main className="collection-page__main">
-        {loading && <p className="collection-page__status">Loading...</p>}
+        {loading && <p className="collection-page__status">{t('public.loading')}</p>}
         {error   && <p className="collection-page__status collection-page__status--error">{error}</p>}
 
         {!loading && !error && (
@@ -101,7 +98,7 @@ export default function PublicCollectionPage() {
                 />
               ))}
               {sortedSections.length === 0 && (
-                <p className="collection-page__empty">No stickers in this tab.</p>
+                <p className="collection-page__empty">{t('public.empty')}</p>
               )}
             </div>
           </>

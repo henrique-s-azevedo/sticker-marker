@@ -1,17 +1,9 @@
-/**
- * Styled text input with an optional show/hide toggle for password fields.
- *
- * @param {string} type - input type; "password" enables the toggle button
- * @param {string} placeholder
- * @param {string} value
- * @param {Function} onChange
- * @param {string} name
- * @param {boolean} required
- */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './Input.css';
 
 export default function Input({ type = 'text', placeholder, value, onChange, name, required }) {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === 'password';
 
@@ -32,7 +24,7 @@ export default function Input({ type = 'text', placeholder, value, onChange, nam
           type="button"
           className="input__toggle-password"
           onClick={() => setShowPassword(v => !v)}
-          aria-label={showPassword ? 'Hide password' : 'Show password'}
+          aria-label={showPassword ? t('input.hide_password') : t('input.show_password')}
         >
           {showPassword ? '🙈' : '👁'}
         </button>

@@ -1,28 +1,15 @@
 /**
- * Modal for adding a friend via three methods:
- *   - By email
- *   - By user tag
- *   - QR code (generates the user's own invite link and renders a QR for others to scan)
- *
- * The QR mode fetches the invite link on demand when the tab is selected.
- * Sending a request by email or tag calls the friendship service and reports success inline.
- *
- * @param {Function} onClose
- * @param {Function} onSuccess - called after a request is sent (triggers friend list refresh)
+ * Modal for adding a friend via email, user tag, or QR code.
  */
 import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { useTranslation } from 'react-i18next';
 import { addFriendByEmail, addFriendByTag } from '../../services/friendshipService';
 import { getMyInvite } from '../../services/profileService';
 import './AddFriendModal.css';
 
-const MODES = [
-  { id: 'email', label: 'By Email' },
-  { id: 'tag',   label: 'By Tag' },
-  { id: 'qr',    label: 'QR Code' },
-];
-
 export default function AddFriendModal({ onClose, onSuccess }) {
+  const { t } = useTranslation();
   const [mode, setMode]         = useState('email');
   const [value, setValue]       = useState('');
   const [loading, setLoading]   = useState(false);
@@ -30,6 +17,12 @@ export default function AddFriendModal({ onClose, onSuccess }) {
   const [success, setSuccess]   = useState('');
   const [invite, setInvite]     = useState(null);
   const [copied, setCopied]     = useState(false);
+
+  const MODES = [
+    { id: 'email', label: t('add_friend.by_email') },
+    { id: 'tag',   label: t('add_friend.by_tag') },
+    { id: 'qr',    label: t('add_friend.qr_code') },
+  ];
 
   useEffect(() => {
     if (mode === 'qr') {
@@ -48,7 +41,7 @@ export default function AddFriendModal({ onClose, onSuccess }) {
       } else {
         await addFriendByTag(value.trim());
       }
-      setSuccess('Request sent!');
+      setSuccess(t('add_friend.request_sent'));
       setValue('');
       onSuccess?.();
     } catch (err) {
@@ -69,7 +62,7 @@ export default function AddFriendModal({ onClose, onSuccess }) {
     <div className="add-friend-modal__overlay" onClick={onClose}>
       <div className="add-friend-modal" onClick={e => e.stopPropagation()}>
         <button className="add-friend-modal__close" onClick={onClose} aria-label="Close">✕</button>
-        <h2 className="add-friend-modal__title">Add Friend</h2>
+        <h2 className="add-friend-modal__title">{t('add_friend.title')}</h2>
 
         <div className="add-friend-modal__modes">
           {MODES.map(m => (
@@ -88,14 +81,14 @@ export default function AddFriendModal({ onClose, onSuccess }) {
             <input
               className="add-friend-modal__input"
               type={mode === 'email' ? 'email' : 'text'}
-              placeholder={mode === 'email' ? 'email@example.com' : '@usertag'}
+              placeholder={mode === 'email' ? t('add_friend.email_placeholder') : t('add_friend.tag_placeholder')}
               value={value}
               onChange={e => setValue(e.target.value)}
               required
               autoFocus
             />
             <button className="add-friend-modal__submit" type="submit" disabled={loading || !value.trim()}>
-              {loading ? 'Sending...' : 'Send request'}
+              {loading ? t('add_friend.sending') : t('add_friend.send_request')}
             </button>
           </form>
         )}
@@ -111,17 +104,17 @@ export default function AddFriendModal({ onClose, onSuccess }) {
                   fgColor="#ffffff"
                 />
                 <p className="add-friend-modal__qr-hint">
-                  Another user scans this QR and sends you a friend request.
+                  {t('add_friend.qr_hint')}
                 </p>
                 <div className="add-friend-modal__qr-link">
                   <span className="add-friend-modal__qr-url">{invite.inviteUrl}</span>
                   <button className="add-friend-modal__copy-btn" onClick={copyLink}>
-                    {copied ? 'Copied!' : 'Copy'}
+                    {copied ? t('add_friend.copied') : t('add_friend.copy')}
                   </button>
                 </div>
               </>
             ) : (
-              !error && <p className="add-friend-modal__loading">Generating QR code...</p>
+              !error && <p className="add-friend-modal__loading">{t('add_friend.generating')}</p>
             )}
           </div>
         )}

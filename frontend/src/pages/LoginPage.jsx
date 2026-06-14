@@ -1,14 +1,11 @@
-/**
- * Login page — email/password form and Google Sign-In.
- * On success, calls saveSession() from AuthContext and navigates to /collection.
- * Errors from either auth method are displayed inline below the form.
- */
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import AuthLayout from '../components/auth/AuthLayout';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
+import LanguageToggle from '../components/common/LanguageToggle';
 import { login } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 import './LoginPage.css';
@@ -16,6 +13,7 @@ import './LoginPage.css';
 export default function LoginPage() {
   const { saveSession } = useAuth();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,16 +41,16 @@ export default function LoginPage() {
   return (
     <AuthLayout>
       <div className="auth-form">
-        <h1 className="auth-form__title">Welcome back</h1>
+        <h1 className="auth-form__title">{t('login.title')}</h1>
         <p className="auth-form__subtitle">
-          Don&apos;t have an account? <Link to="/register">Create one</Link>
+          {t('login.no_account')} <Link to="/register">{t('login.create_one')}</Link>
         </p>
 
         <form className="auth-form__fields" onSubmit={handleSubmit}>
           <Input
             name="email"
             type="email"
-            placeholder="Email"
+            placeholder={t('login.email')}
             value={form.email}
             onChange={handleChange}
             required
@@ -60,24 +58,26 @@ export default function LoginPage() {
           <Input
             name="password"
             type="password"
-            placeholder="Enter your password"
+            placeholder={t('login.password')}
             value={form.password}
             onChange={handleChange}
             required
           />
           {error && <p className="auth-form__error">{error}</p>}
           <Button type="submit" fullWidth disabled={loading}>
-            {loading ? 'A entrar...' : 'Log in'}
+            {loading ? t('login.loading') : t('login.submit')}
           </Button>
         </form>
 
         <div className="auth-form__divider">
-          <span>Or sign in with</span>
+          <span>{t('login.or_sign_in')}</span>
         </div>
 
         <div className="auth-form__social">
-          <GoogleSignInButton onError={setError} />
+          <GoogleSignInButton key={i18n.language} locale={i18n.language} onError={setError} />
         </div>
+
+        <LanguageToggle />
       </div>
     </AuthLayout>
   );

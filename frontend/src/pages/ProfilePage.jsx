@@ -1,27 +1,9 @@
 /**
- * Profile page — account settings and social hub, organized into four tabs:
- *
- *   Profile  — display name, email, userTag, collection visibility toggle, password change
- *   Friends  — friend list with message/trade/view-collection actions; filterable
- *   Requests — incoming/outgoing friend requests, user search by name or @tag
- *   Messages — conversation list with unread badge, filterable by friend name
- *
- * Data loading: each tab loads its data lazily when first activated.
- * The profile tab always loads on mount so the hero avatar renders immediately.
- *
- * Password change flow (two-step):
- *   1. User clicks "Send verification code" → sendPasswordChangeCode() emails a code.
- *   2. User enters code + current + new passwords → changePassword().
- *   Not available for Google accounts (googleAccount flag from UserProfileDTO).
- *
- * TradeOptionsModal is opened from the friends tab to initiate trades/sells.
- * AddFriendModal handles friend requests by email, tag, or QR code.
- *
- * UserSearchRow (local component) — search result with an inline "Add friend" button
- * that optimistically updates to "Request sent" after the request is sent.
+ * Profile page — account settings and social hub.
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import {
   getProfile, updateVisibility, changePassword, sendPasswordChangeCode,
@@ -37,16 +19,18 @@ import TradeOptionsModal from '../components/trade/TradeOptionsModal';
 import AddFriendModal from '../components/profile/AddFriendModal';
 import './ProfilePage.css';
 
-const VISIBILITY_LABELS = {
-  PUBLIC:       'Public',
-  FRIENDS_ONLY: 'Friends only',
-  PRIVATE:      'Private',
-};
-
 export default function ProfilePage() {
   const navigate  = useNavigate();
   const location  = useLocation();
   const { logout } = useAuth();
+  const { t } = useTranslation();
+
+  const VISIBILITY_OPTIONS = [
+    { key: 'PUBLIC',       label: t('profile.vis_public') },
+    { key: 'FRIENDS_ONLY', label: t('profile.vis_friends') },
+    { key: 'PRIVATE',      label: t('profile.vis_private') },
+  ];
+
   const [tab, setTab]                   = useState(location.state?.tab ?? 'profile');
   const [profile, setProfile]           = useState(null);
   const [friends, setFriends]           = useState([]);
@@ -118,11 +102,11 @@ export default function ProfilePage() {
   async function handleChangePassword(e) {
     e.preventDefault();
     setPwError(''); setPwSuccess('');
-    if (pwForm.next !== pwForm.confirm) { setPwError('Passwords do not match'); return; }
+    if (pwForm.next !== pwForm.confirm) { setPwError(t('profile.passwords_no_match')); return; }
     setSaving(true);
     try {
       await changePassword(pwForm.current, pwForm.next, pwForm.code);
-      setPwSuccess('Password changed successfully!');
+      setPwSuccess(t('profile.password_changed'));
       setPwForm({ code: '', current: '', next: '', confirm: '' });
       setPwCodeSent(false);
     } catch (err) {
@@ -160,11 +144,11 @@ export default function ProfilePage() {
     <div className="profile-page">
       <header className="profile-page__header">
         <button className="profile-page__back" onClick={() => navigate('/collection')}>
-          ← Back
+          {t('profile.back')}
         </button>
-        <h1 className="profile-page__title">Profile</h1>
+        <h1 className="profile-page__title">{t('profile.title')}</h1>
         <button className="profile-page__logout" onClick={() => { logout(); navigate('/login'); }}>
-          Sign out
+          {t('profile.sign_out')}
         </button>
       </header>
 
@@ -180,17 +164,17 @@ export default function ProfilePage() {
 
       <nav className="profile-page__tabs">
         {[
-          { id: 'profile',  label: 'Profile' },
-          { id: 'friends',  label: `Friends${friends.length ? ` (${friends.length})` : ''}` },
-          { id: 'requests', label: `Requests${profile?.pendingRequestsCount > 0 ? ` · ${profile.pendingRequestsCount}` : ''}` },
-          { id: 'messages', label: `Messages${conversations.some(c => c.unreadCount > 0) ? ` · ${conversations.reduce((s, c) => s + c.unreadCount, 0)}` : ''}` },
-        ].map(t => (
+          { id: 'profile',  label: t('profile.tab_profile') },
+          { id: 'friends',  label: `${t('profile.tab_friends')}${friends.length ? ` (${friends.length})` : ''}` },
+          { id: 'requests', label: `${t('profile.tab_requests')}${profile?.pendingRequestsCount > 0 ? ` · ${profile.pendingRequestsCount}` : ''}` },
+          { id: 'messages', label: `${t('profile.tab_messages')}${conversations.some(c => c.unreadCount > 0) ? ` · ${conversations.reduce((s, c) => s + c.unreadCount, 0)}` : ''}` },
+        ].map(tab_ => (
           <button
-            key={t.id}
-            className={`profile-page__tab${tab === t.id ? ' profile-page__tab--active' : ''}`}
-            onClick={() => setTab(t.id)}
+            key={tab_.id}
+            className={`profile-page__tab${tab === tab_.id ? ' profile-page__tab--active' : ''}`}
+            onClick={() => setTab(tab_.id)}
           >
-            {t.label}
+            {tab_.label}
           </button>
         ))}
       </nav>
@@ -201,26 +185,26 @@ export default function ProfilePage() {
         {tab === 'profile' && profile && (
           <div className="profile-page__section">
             <div className="profile-page__card">
-              <h2 className="profile-page__card-title">Information</h2>
+              <h2 className="profile-page__card-title">{t('profile.information')}</h2>
               <div className="profile-page__info-row">
-                <span className="profile-page__info-label">Name</span>
+                <span className="profile-page__info-label">{t('profile.name')}</span>
                 <span className="profile-page__info-value">{profile.displayName}</span>
               </div>
               <div className="profile-page__info-row">
-                <span className="profile-page__info-label">Email</span>
+                <span className="profile-page__info-label">{t('profile.email_label')}</span>
                 <span className="profile-page__info-value">{profile.email}</span>
               </div>
               <div className="profile-page__info-row">
-                <span className="profile-page__info-label">Tag</span>
+                <span className="profile-page__info-label">{t('profile.tag')}</span>
                 <span className="profile-page__info-value profile-page__tag-badge">@{profile.userTag}</span>
               </div>
             </div>
 
             <div className="profile-page__card">
-              <h2 className="profile-page__card-title">Collection Visibility</h2>
-              <p className="profile-page__card-desc">Who can see your collection</p>
+              <h2 className="profile-page__card-title">{t('profile.visibility_title')}</h2>
+              <p className="profile-page__card-desc">{t('profile.visibility_desc')}</p>
               <div className="profile-page__vis-options">
-                {Object.entries(VISIBILITY_LABELS).map(([key, label]) => (
+                {VISIBILITY_OPTIONS.map(({ key, label }) => (
                   <button
                     key={key}
                     disabled={saving}
@@ -234,29 +218,29 @@ export default function ProfilePage() {
             </div>
 
             <div className="profile-page__card">
-              <h2 className="profile-page__card-title">Change Password</h2>
+              <h2 className="profile-page__card-title">{t('profile.change_password_title')}</h2>
               {profile.googleAccount
-                ? <p className="profile-page__card-desc">This account uses Google Sign-In. Password change is not available.</p>
+                ? <p className="profile-page__card-desc">{t('profile.google_no_password')}</p>
                 : !pwCodeSent
                   ? (
                     <div className="profile-page__pw-form">
                       <p className="profile-page__card-desc">
-                        A verification code will be sent to <strong>{profile.email}</strong>.
+                        {t('profile.code_will_be_sent')} <strong>{profile.email}</strong>.
                       </p>
                       {pwError && <p className="profile-page__error">{pwError}</p>}
                       <button className="profile-page__btn-primary" onClick={handleSendCode} disabled={pwSending}>
-                        {pwSending ? 'Sending...' : 'Send verification code'}
+                        {pwSending ? t('profile.sending') : t('profile.send_code')}
                       </button>
                     </div>
                   )
                   : (
                     <form className="profile-page__pw-form" onSubmit={handleChangePassword}>
-                      <p className="profile-page__card-desc">Code sent to <strong>{profile.email}</strong>. Valid for 15 minutes.</p>
+                      <p className="profile-page__card-desc">{t('profile.code_sent_to')} <strong>{profile.email}</strong>. {t('profile.code_valid')}</p>
                       <input
                         className="profile-page__input"
                         type="text"
                         inputMode="numeric"
-                        placeholder="Verification code"
+                        placeholder={t('profile.verification_code')}
                         value={pwForm.code}
                         onChange={e => setPwForm(p => ({ ...p, code: e.target.value }))}
                         required
@@ -265,7 +249,7 @@ export default function ProfilePage() {
                       <input
                         className="profile-page__input"
                         type="password"
-                        placeholder="Current password"
+                        placeholder={t('profile.current_password')}
                         value={pwForm.current}
                         onChange={e => setPwForm(p => ({ ...p, current: e.target.value }))}
                         required
@@ -273,7 +257,7 @@ export default function ProfilePage() {
                       <input
                         className="profile-page__input"
                         type="password"
-                        placeholder="New password (min. 8 characters)"
+                        placeholder={t('profile.new_password')}
                         value={pwForm.next}
                         onChange={e => setPwForm(p => ({ ...p, next: e.target.value }))}
                         required
@@ -282,7 +266,7 @@ export default function ProfilePage() {
                       <input
                         className="profile-page__input"
                         type="password"
-                        placeholder="Confirm new password"
+                        placeholder={t('profile.confirm_password')}
                         value={pwForm.confirm}
                         onChange={e => setPwForm(p => ({ ...p, confirm: e.target.value }))}
                         required
@@ -291,14 +275,14 @@ export default function ProfilePage() {
                       {pwSuccess && <p className="profile-page__success">{pwSuccess}</p>}
                       <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
                         <button className="profile-page__btn-primary" type="submit" disabled={saving}>
-                          {saving ? 'Saving...' : 'Change password'}
+                          {saving ? t('profile.saving') : t('profile.change_password_btn')}
                         </button>
                         <button
                           type="button"
                           className="profile-page__btn-secondary"
                           onClick={() => { setPwCodeSent(false); setPwError(''); setPwForm({ code: '', current: '', next: '', confirm: '' }); }}
                         >
-                          Cancel
+                          {t('profile.cancel')}
                         </button>
                       </div>
                     </form>
@@ -313,16 +297,16 @@ export default function ProfilePage() {
             <input
               className="profile-page__search"
               type="text"
-              placeholder="Filter friends..."
+              placeholder={t('profile.filter_friends')}
               value={friendsFilterQ}
               onChange={e => setFriendsFilterQ(e.target.value)}
             />
 
             <div className="profile-page__card">
-              <h3 className="profile-page__card-title">Your friends ({filteredFriends.length})</h3>
+              <h3 className="profile-page__card-title">{t('profile.your_friends')} ({filteredFriends.length})</h3>
               {filteredFriends.length === 0
                 ? <p className="profile-page__empty">
-                    {friendsFilterQ ? 'No friends found.' : 'No friends added yet.'}
+                    {friendsFilterQ ? t('profile.no_friends_filter') : t('profile.no_friends')}
                   </p>
                 : filteredFriends.map(f => (
                   <div key={f.id} className="profile-page__friend-row">
@@ -336,27 +320,27 @@ export default function ProfilePage() {
                         className="profile-page__btn-secondary"
                         onClick={() => navigate(`/chat/${f.id}`)}
                       >
-                        Message
+                        {t('profile.message_btn')}
                       </button>
                       <button
                         className="profile-page__btn-secondary"
                         onClick={() => setTradeModalFriend(f)}
                       >
-                        View trades
+                        {t('profile.view_trades')}
                       </button>
                       {f.collectionVisibility !== 'PRIVATE' && (
                         <button
                           className="profile-page__btn-secondary"
                           onClick={() => navigate(`/collection/${f.userTag}`)}
                         >
-                          View collection
+                          {t('profile.view_collection')}
                         </button>
                       )}
                       <button
                         className="profile-page__btn-danger"
                         onClick={() => handleRemoveFriend(f.id)}
                       >
-                        Remove
+                        {t('profile.remove')}
                       </button>
                     </div>
                   </div>
@@ -372,20 +356,20 @@ export default function ProfilePage() {
               <input
                 className="profile-page__search"
                 type="text"
-                placeholder="Search users (@tag or name)..."
+                placeholder={t('profile.search_users')}
                 value={searchQ}
                 onChange={handleSearch}
               />
               <button className="profile-page__btn-primary" onClick={() => setShowAddModal(true)}>
-                + Add Friend
+                {t('profile.add_friend')}
               </button>
             </div>
 
             {searchQ.trim().length >= 2 && (
               <div className="profile-page__card">
-                <h3 className="profile-page__card-title">Results</h3>
+                <h3 className="profile-page__card-title">{t('profile.results')}</h3>
                 {searchResults.length === 0
-                  ? <p className="profile-page__empty">No users found.</p>
+                  ? <p className="profile-page__empty">{t('profile.no_users')}</p>
                   : searchResults.map(u => (
                     <UserSearchRow key={u.id} user={u} onRequestSent={loadRequests} />
                   ))
@@ -394,9 +378,9 @@ export default function ProfilePage() {
             )}
 
             <div className="profile-page__card">
-              <h3 className="profile-page__card-title">Received requests ({requests.length})</h3>
+              <h3 className="profile-page__card-title">{t('profile.received_requests')} ({requests.length})</h3>
               {requests.length === 0
-                ? <p className="profile-page__empty">No pending requests.</p>
+                ? <p className="profile-page__empty">{t('profile.no_pending')}</p>
                 : requests.map(r => (
                   <div key={r.id} className="profile-page__request-row">
                     <div className="profile-page__friend-avatar">{r.requesterDisplayName?.[0]?.toUpperCase()}</div>
@@ -405,8 +389,8 @@ export default function ProfilePage() {
                       <span className="profile-page__friend-tag">@{r.requesterUserTag}</span>
                     </div>
                     <div className="profile-page__friend-actions">
-                      <button className="profile-page__btn-primary" onClick={() => handleAccept(r.id)}>Accept</button>
-                      <button className="profile-page__btn-danger"  onClick={() => handleReject(r.id)}>Reject</button>
+                      <button className="profile-page__btn-primary" onClick={() => handleAccept(r.id)}>{t('profile.accept')}</button>
+                      <button className="profile-page__btn-danger"  onClick={() => handleReject(r.id)}>{t('profile.reject')}</button>
                     </div>
                   </div>
                 ))
@@ -414,9 +398,9 @@ export default function ProfilePage() {
             </div>
 
             <div className="profile-page__card">
-              <h3 className="profile-page__card-title">Sent requests ({sentReqs.length})</h3>
+              <h3 className="profile-page__card-title">{t('profile.sent_requests')} ({sentReqs.length})</h3>
               {sentReqs.length === 0
-                ? <p className="profile-page__empty">No requests sent.</p>
+                ? <p className="profile-page__empty">{t('profile.no_sent')}</p>
                 : sentReqs.map(r => (
                   <div key={r.id} className="profile-page__request-row">
                     <div className="profile-page__friend-avatar">{r.addresseeDisplayName?.[0]?.toUpperCase()}</div>
@@ -424,7 +408,7 @@ export default function ProfilePage() {
                       <span className="profile-page__friend-name">{r.addresseeDisplayName}</span>
                       <span className="profile-page__friend-tag">@{r.addresseeUserTag}</span>
                     </div>
-                    <span className="profile-page__pending-badge">Pending</span>
+                    <span className="profile-page__pending-badge">{t('profile.pending')}</span>
                   </div>
                 ))
               }
@@ -437,15 +421,15 @@ export default function ProfilePage() {
             <input
               className="profile-page__search"
               type="text"
-              placeholder="Filter conversations..."
+              placeholder={t('profile.filter_conversations')}
               value={msgsFilterQ}
               onChange={e => setMsgsFilterQ(e.target.value)}
             />
             <div className="profile-page__card">
-              <h3 className="profile-page__card-title">Conversations</h3>
+              <h3 className="profile-page__card-title">{t('profile.conversations')}</h3>
               {filteredConversations.length === 0
                 ? <p className="profile-page__empty">
-                    {msgsFilterQ ? 'No conversations found.' : "No messages yet. Open a friend's chat."}
+                    {msgsFilterQ ? t('profile.no_conversations_filter') : t('profile.no_conversations')}
                   </p>
                 : filteredConversations.map(c => (
                   <div
@@ -488,8 +472,8 @@ export default function ProfilePage() {
   );
 }
 
-/** Search result row with an inline "Add friend" button. Optimistically updates to "Request sent". */
 function UserSearchRow({ user, onRequestSent }) {
+  const { t } = useTranslation();
   const [status, setStatus] = useState(user.friendshipStatus ?? null);
   const [loading, setLoading] = useState(false);
 
@@ -511,12 +495,12 @@ function UserSearchRow({ user, onRequestSent }) {
         <span className="profile-page__friend-tag">@{user.userTag}</span>
       </div>
       {status === 'ACCEPTED'
-        ? <span className="profile-page__already-friends">Friends</span>
+        ? <span className="profile-page__already-friends">{t('profile.friends_status')}</span>
         : status === 'PENDING'
-          ? <span className="profile-page__pending-badge">Request sent</span>
+          ? <span className="profile-page__pending-badge">{t('profile.request_sent')}</span>
           : (
             <button className="profile-page__btn-secondary" onClick={send} disabled={loading}>
-              {loading ? '...' : '+ Add'}
+              {loading ? '...' : t('profile.add')}
             </button>
           )
       }

@@ -250,39 +250,17 @@ npm run build
 
 ---
 
-## Roadmap
+## Roadmap / Future Features
 
 | Priority | Feature |
 |---|---|
 | High | Automated integration tests (Testcontainers + Spring Boot Test) |
-| High | Schema version control with Flyway |
 | Medium | Real-time chat via WebSockets (STOMP) |
 | Medium | Push notifications for new messages and trade proposals |
 | Medium | Multi-album support (any Panini collection, not just WC 2026) |
 | Low | TypeScript migration for the frontend |
-| Low | Redis caching for progress and trade calculation endpoints |
 | Low | Rate limiting on `/auth/**` endpoints |
-| Low | Profile picture upload (S3 / Cloudflare R2) |
-
----
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feat/your-feature`
-3. Commit your changes following the convention:
-   ```
-   feat: add X
-   fix: resolve Y
-   chore: update Z
-   ```
-4. Push and open a Pull Request against `master`
-
----
-
-## License
-
-This project is licensed under the **MIT License** — see the [LICENSE](./LICENSE) file for details.
+| Low | Profile picture upload |
 
 ---
 

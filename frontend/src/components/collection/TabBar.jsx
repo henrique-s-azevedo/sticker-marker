@@ -9,10 +9,10 @@
 import './TabBar.css';
 
 const TABS = [
-  { key: 'ALL', label: 'Todos' },
-  { key: 'MISSING', label: 'Em Falta' },
-  { key: 'OWNED', label: 'Colecionados' },
-  { key: 'DUPLICATE', label: 'Duplicados' },
+  { key: 'ALL', label: 'All' },
+  { key: 'MISSING', label: 'Missing' },
+  { key: 'OWNED', label: 'Owned' },
+  { key: 'DUPLICATE', label: 'Duplicates' },
 ];
 
 export default function TabBar({ activeTab, onTabChange }) {

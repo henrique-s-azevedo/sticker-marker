@@ -19,7 +19,7 @@ export default function StickerSearch({ value, onChange }) {
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
-        placeholder="Pesquisar cromo... (ex: CAN, CAN1, 1)"
+        placeholder="Search sticker... (e.g.: CAN, CAN1, 1)"
         autoComplete="off"
         spellCheck={false}
       />
@@ -28,7 +28,7 @@ export default function StickerSearch({ value, onChange }) {
           type="button"
           className="sticker-search__clear"
           onClick={() => onChange('')}
-          aria-label="Limpar pesquisa"
+          aria-label="Clear search"
         >
           <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
             <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />

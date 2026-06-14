@@ -64,12 +64,12 @@ public class InviteCodeService {
      */
     public FriendRequestDTO acceptInvite(String code, Long acceptingUserId) {
         InviteCode invite = inviteCodeRepository.findByCode(code)
-                .orElseThrow(() -> new IllegalArgumentException("Código inválido"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid code"));
 
-        if (!invite.isActive()) throw new IllegalArgumentException("Código inativo");
-        if (invite.getExpiresAt().isBefore(Instant.now())) throw new IllegalArgumentException("Código expirado");
+        if (!invite.isActive()) throw new IllegalArgumentException("Inactive code");
+        if (invite.getExpiresAt().isBefore(Instant.now())) throw new IllegalArgumentException("Expired code");
         if (invite.getCreator().getId().equals(acceptingUserId)) {
-            throw new IllegalArgumentException("Não podes aceitar o teu próprio convite");
+            throw new IllegalArgumentException("You cannot accept your own invite");
         }
 
         return friendshipService.sendRequest(acceptingUserId, invite.getCreator().getId());

@@ -18,10 +18,10 @@ import { useState } from 'react';
 import './ShareModal.css';
 
 const CATEGORIES = [
-  { id: 'MISSING',   label: 'Em falta' },
-  { id: 'DUPLICATE', label: 'Repetidos' },
-  { id: 'OWNED',     label: 'Colecionados' },
-  { id: 'ALL',       label: 'Todos' },
+  { id: 'MISSING',   label: 'Missing' },
+  { id: 'DUPLICATE', label: 'Duplicates' },
+  { id: 'OWNED',     label: 'Owned' },
+  { id: 'ALL',       label: 'All' },
 ];
 
 const FLAG_EMOJI = {
@@ -48,7 +48,7 @@ function getSubset(stickers, categoryId) {
 
 function buildSection(stickers, categoryId) {
   const subset = getSubset(stickers, categoryId);
-  if (subset.length === 0) return '(nenhum)';
+  if (subset.length === 0) return '(none)';
 
   const groups = {};
   for (const s of subset) {
@@ -80,9 +80,9 @@ function buildMessage(stickers, categoryId, categoryLabel) {
     `WC 2026 - ${categoryLabel}`,
     mainSection,
     '',
-    `Colecionados:\n${ownedSection}`,
-    `Em falta:\n${missingSection}`,
-    `Repetidos:\n${dupSection}`,
+    `Owned:\n${ownedSection}`,
+    `Missing:\n${missingSection}`,
+    `Duplicates:\n${dupSection}`,
   ].join('\n');
 }
 
@@ -111,9 +111,9 @@ export default function ShareModal({ mode, stickers, onClose }) {
     const msg = buildMessage(stickers, category.id, category.label);
     try {
       await navigator.clipboard.writeText(msg);
-      showFeedback('Texto copiado!');
+      showFeedback('Text copied!');
     } catch {
-      showFeedback('Não foi possível copiar.');
+      showFeedback('Could not copy.');
     }
   }
 
@@ -130,7 +130,7 @@ export default function ShareModal({ mode, stickers, onClose }) {
       await navigator.clipboard.writeText(msg);
     } catch { /* ignore */ }
     window.open('https://www.messenger.com/', '_blank');
-    showFeedback('Texto copiado! Cola no Messenger.');
+    showFeedback('Text copied! Paste in Messenger.');
   }
 
   async function handleWebShare() {
@@ -146,14 +146,14 @@ export default function ShareModal({ mode, stickers, onClose }) {
   return (
     <div className="share-modal__overlay" onClick={onClose}>
       <div className="share-modal" onClick={e => e.stopPropagation()}>
-        <button className="share-modal__close" onClick={onClose} aria-label="Fechar">✕</button>
+        <button className="share-modal__close" onClick={onClose} aria-label="Close">✕</button>
 
         {step === 'category' && (
           <>
             <h2 className="share-modal__title">
-              {mode === 'whatsapp' ? 'Partilhar no WhatsApp' : 'Partilhar'}
+              {mode === 'whatsapp' ? 'Share on WhatsApp' : 'Share'}
             </h2>
-            <p className="share-modal__subtitle">O que queres partilhar?</p>
+            <p className="share-modal__subtitle">What do you want to share?</p>
             <div className="share-modal__categories">
               {CATEGORIES.map(cat => (
                 <button
@@ -171,14 +171,14 @@ export default function ShareModal({ mode, stickers, onClose }) {
         {step === 'platform' && category && (
           <>
             <button className="share-modal__back" onClick={() => setStep('category')}>
-              ← Voltar
+              ← Back
             </button>
             <h2 className="share-modal__title">{category.label}</h2>
-            <p className="share-modal__subtitle">Como queres partilhar?</p>
+            <p className="share-modal__subtitle">How do you want to share?</p>
             <div className="share-modal__platforms">
               <button className="share-modal__platform-btn" onClick={handleCopy}>
                 <ClipboardIcon />
-                Copiar texto
+                Copy text
               </button>
               <button className="share-modal__platform-btn share-modal__platform-btn--messenger" onClick={handleMessenger}>
                 <MessengerIcon />
@@ -191,7 +191,7 @@ export default function ShareModal({ mode, stickers, onClose }) {
               {typeof navigator !== 'undefined' && navigator.share && (
                 <button className="share-modal__platform-btn" onClick={handleWebShare}>
                   <NativeShareIcon />
-                  Mais opções
+                  More options
                 </button>
               )}
             </div>

@@ -16,7 +16,7 @@ export default function CountrySelect({
   options = [],
   value,
   onChange,
-  placeholder = 'Selecionar país...',
+  placeholder = 'Select country...',
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -154,7 +154,7 @@ export default function CountrySelect({
           className={`country-select__arrow${open ? ' country-select__arrow--open' : ''}`}
           onClick={handleToggleClick}
           tabIndex={-1}
-          aria-label={open ? 'Fechar lista' : 'Abrir lista'}
+          aria-label={open ? 'Close list' : 'Open list'}
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
             <path d="M2.5 5l4.5 4 4.5-4" stroke="currentColor" strokeWidth="1.8"
@@ -169,10 +169,10 @@ export default function CountrySelect({
           id={`${id}-listbox`}
           className="country-select__dropdown"
           role="listbox"
-          aria-label="Países"
+          aria-label="Countries"
         >
           {filtered.length === 0 ? (
-            <li className="country-select__empty">Nenhum resultado</li>
+            <li className="country-select__empty">No results</li>
           ) : (
             filtered.map((option, i) => (
               <li

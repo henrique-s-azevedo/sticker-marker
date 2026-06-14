@@ -52,7 +52,7 @@ public class MessageService {
      */
     public MessageDTO send(Long senderId, Long recipientId, SendMessageDTO dto) {
         if (!friendshipService.areFriends(senderId, recipientId)) {
-            throw new IllegalArgumentException("Só podes enviar mensagens a amigos");
+            throw new IllegalArgumentException("You can only send messages to friends");
         }
         return sendInternal(senderId, recipientId, dto.getContent().trim(), MessageType.CHAT, null);
     }
@@ -117,7 +117,7 @@ public class MessageService {
      */
     public List<MessageDTO> getConversation(Long myId, Long friendId) {
         if (!friendshipService.areFriends(myId, friendId)) {
-            throw new IllegalArgumentException("Não és amigo deste utilizador");
+            throw new IllegalArgumentException("You are not friends with this user");
         }
         return messageRepository.findConversation(myId, friendId).stream()
                 .map(this::toDTO)

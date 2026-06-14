@@ -17,19 +17,19 @@ export default function StatsBar({ total, owned, missing, duplicates }) {
     <div className="stats-bar">
       <div className="stats-bar__item stats-bar__item--owned">
         <span className="stats-bar__value">{owned}</span>
-        <span className="stats-bar__label">Colecionados</span>
+        <span className="stats-bar__label">Owned</span>
       </div>
       <div className="stats-bar__item stats-bar__item--missing">
         <span className="stats-bar__value">{missing}</span>
-        <span className="stats-bar__label">Em Falta</span>
+        <span className="stats-bar__label">Missing</span>
       </div>
       <div className="stats-bar__item stats-bar__item--duplicate">
         <span className="stats-bar__value">{duplicates}</span>
-        <span className="stats-bar__label">Duplicados</span>
+        <span className="stats-bar__label">Duplicates</span>
       </div>
       <div className="stats-bar__item stats-bar__item--progress">
         <span className="stats-bar__value">{progress}%</span>
-        <span className="stats-bar__label">Progresso</span>
+        <span className="stats-bar__label">Progress</span>
       </div>
     </div>
   );

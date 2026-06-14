@@ -58,7 +58,7 @@ public class SellService {
      */
     public SellCalculationDTO calculateSell(Long sellerId, Long buyerId) {
         if (!friendshipService.areFriends(sellerId, buyerId)) {
-            throw new IllegalArgumentException("Não és amigo deste utilizador");
+            throw new IllegalArgumentException("You are not friends with this user");
         }
         return buildCalculation(sellerId, buyerId);
     }
@@ -74,7 +74,7 @@ public class SellService {
      */
     public SellCalculationDTO calculateBuy(Long buyerId, Long sellerId) {
         if (!friendshipService.areFriends(buyerId, sellerId)) {
-            throw new IllegalArgumentException("Não és amigo deste utilizador");
+            throw new IllegalArgumentException("You are not friends with this user");
         }
         return buildCalculation(sellerId, buyerId);
     }
@@ -92,7 +92,7 @@ public class SellService {
     @Transactional
     public SellProposalDTO proposeSell(Long sellerId, Long buyerId, CreateSellDTO dto) {
         if (!friendshipService.areFriends(sellerId, buyerId)) {
-            throw new IllegalArgumentException("Só podes propor vendas a amigos");
+            throw new IllegalArgumentException("You can only propose sales to friends");
         }
         validateBatches(dto.getBatches());
 
@@ -123,7 +123,7 @@ public class SellService {
     @Transactional
     public SellProposalDTO proposeBuy(Long buyerId, Long sellerId, CreateSellDTO dto) {
         if (!friendshipService.areFriends(buyerId, sellerId)) {
-            throw new IllegalArgumentException("Só podes propor compras a amigos");
+            throw new IllegalArgumentException("You can only propose purchases to friends");
         }
         validateBatches(dto.getBatches());
 
@@ -154,10 +154,10 @@ public class SellService {
         boolean isParticipant = proposal.getSeller().getId().equals(userId)
                 || proposal.getBuyer().getId().equals(userId);
         if (!isParticipant) {
-            throw new IllegalArgumentException("Sem permissão para confirmar esta proposta");
+            throw new IllegalArgumentException("Not authorised to complete this proposal");
         }
         if (proposal.getStatus() != SellProposalStatus.PENDING) {
-            throw new IllegalArgumentException("Proposta já foi processada");
+            throw new IllegalArgumentException("Proposal has already been processed");
         }
 
         User seller = userService.getById(proposal.getSeller().getId());
@@ -185,9 +185,9 @@ public class SellService {
         SellProposal proposal = getAndValidate(sellId);
         boolean isParticipant = proposal.getSeller().getId().equals(userId)
                 || proposal.getBuyer().getId().equals(userId);
-        if (!isParticipant) throw new IllegalArgumentException("Sem permissão");
+        if (!isParticipant) throw new IllegalArgumentException("Not authorised");
         if (proposal.getStatus() != SellProposalStatus.PENDING) {
-            throw new IllegalArgumentException("Proposta já foi processada");
+            throw new IllegalArgumentException("Proposal has already been processed");
         }
         proposal.setStatus(SellProposalStatus.CANCELLED);
         return toDTO(sellProposalRepository.save(proposal));
@@ -205,7 +205,7 @@ public class SellService {
         SellProposal proposal = getAndValidate(sellId);
         boolean isParticipant = proposal.getSeller().getId().equals(userId)
                 || proposal.getBuyer().getId().equals(userId);
-        if (!isParticipant) throw new IllegalArgumentException("Sem permissão");
+        if (!isParticipant) throw new IllegalArgumentException("Not authorised");
         return toDTO(proposal);
     }
 
@@ -252,14 +252,14 @@ public class SellService {
      */
     private void validateBatches(List<SellBatchDTO> batches) {
         if (batches == null || batches.isEmpty()) {
-            throw new IllegalArgumentException("A proposta não tem cromos");
+            throw new IllegalArgumentException("The proposal has no stickers");
         }
         for (SellBatchDTO batch : batches) {
             if (batch.getStickerCodes() == null || batch.getStickerCodes().isEmpty()) {
-                throw new IllegalArgumentException("Um dos grupos está vazio");
+                throw new IllegalArgumentException("One of the groups is empty");
             }
             if (batch.getPricePerUnit() == null || batch.getPricePerUnit().compareTo(BigDecimal.ZERO) < 0) {
-                throw new IllegalArgumentException("Preço inválido");
+                throw new IllegalArgumentException("Invalid price");
             }
         }
     }
@@ -300,7 +300,7 @@ public class SellService {
      */
     private String buildMessageContent(String recipientName, List<SellBatchDTO> batches, boolean isSelling) {
         StringBuilder sb = new StringBuilder();
-        sb.append(recipientName).append(isSelling ? ", quero vender:\n" : ", quero comprar:\n");
+        sb.append(recipientName).append(isSelling ? ", I want to sell you:\n" : ", I want to buy from you:\n");
         BigDecimal total = BigDecimal.ZERO;
         for (SellBatchDTO batch : batches) {
             for (String code : batch.getStickerCodes()) {
@@ -312,7 +312,7 @@ public class SellService {
             }
         }
         sb.append("Total: ").append(String.format(Locale.ENGLISH, "%.2f€", total)).append("\n");
-        sb.append("Envia mensagem a confirmar ou rejeitar.");
+        sb.append("Reply to confirm or reject.");
         return sb.toString();
     }
 
@@ -329,7 +329,7 @@ public class SellService {
     private void transferDuplicate(User giver, User receiver, String code) {
         var giverDup = userDuplicateRepository.findByUserAndSticker_Code(giver, code)
                 .orElseThrow(() -> new IllegalStateException(
-                        giver.getDisplayName() + " não tem " + code + " duplicado"));
+                        giver.getDisplayName() + " does not have " + code + " as a duplicate"));
 
         if (giverDup.getQuantity() > 1) {
             giverDup.setQuantity(giverDup.getQuantity() - 1);
@@ -363,7 +363,7 @@ public class SellService {
 
     private SellProposal getAndValidate(Long sellId) {
         return sellProposalRepository.findById(sellId)
-                .orElseThrow(() -> new RuntimeException("Proposta não encontrada"));
+                .orElseThrow(() -> new RuntimeException("Proposal not found"));
     }
 
     /**

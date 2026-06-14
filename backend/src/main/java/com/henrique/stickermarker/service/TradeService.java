@@ -57,7 +57,7 @@ public class TradeService {
      */
     public TradeCalculationDTO calculate(Long myId, Long friendId) {
         if (!friendshipService.areFriends(myId, friendId)) {
-            throw new IllegalArgumentException("Não és amigo deste utilizador");
+            throw new IllegalArgumentException("You are not friends with this user");
         }
         User me = userService.getById(myId);
         User friend = userService.getById(friendId);
@@ -116,7 +116,7 @@ public class TradeService {
     @Transactional
     public TradeProposalDTO propose(Long proposerId, Long counterpartId, CreateTradeDTO dto) {
         if (!friendshipService.areFriends(proposerId, counterpartId)) {
-            throw new IllegalArgumentException("Só podes propor trocas a amigos");
+            throw new IllegalArgumentException("You can only propose trades to friends");
         }
         User proposer = userService.getById(proposerId);
         User counterpart = userService.getById(counterpartId);
@@ -131,8 +131,8 @@ public class TradeService {
 
         String items = String.join(", ", dto.getProposerItems());
         String wants = String.join(", ", dto.getCounterpartItems());
-        String content = proposer.getDisplayName() + " quer fazer " + dto.getProposerItems().size()
-                + " troca(s) contigo! Oferece: " + items + " | Quer os teus: " + wants;
+        String content = proposer.getDisplayName() + " wants to make " + dto.getProposerItems().size()
+                + " trade(s) with you! Offering: " + items + " | Wants your: " + wants;
         messageService.sendInternal(proposerId, counterpartId, content, MessageType.TRADE_PROPOSAL, saved.getId());
 
         return toDTO(saved);
@@ -154,12 +154,12 @@ public class TradeService {
     @Transactional
     public TradeProposalDTO respond(Long tradeId, Long counterpartId, RespondTradeDTO dto) {
         TradeProposal trade = tradeProposalRepository.findById(tradeId)
-                .orElseThrow(() -> new RuntimeException("Troca não encontrada"));
+                .orElseThrow(() -> new RuntimeException("Trade not found"));
         if (!trade.getCounterpart().getId().equals(counterpartId)) {
-            throw new IllegalArgumentException("Sem permissão");
+            throw new IllegalArgumentException("Not authorised");
         }
         if (trade.getStatus() != TradeStatus.PENDING_COUNTERPART) {
-            throw new IllegalArgumentException("Troca não está à espera de resposta");
+            throw new IllegalArgumentException("Trade is not awaiting a response");
         }
 
         Long proposerId = trade.getProposer().getId();
@@ -169,7 +169,7 @@ public class TradeService {
             trade.setStatus(TradeStatus.REJECTED);
             tradeProposalRepository.save(trade);
             messageService.sendInternal(counterpartId, proposerId,
-                    counterpartName + " recusou a tua proposta de troca.", MessageType.TRADE_REJECTED, tradeId);
+                    counterpartName + " declined your trade proposal.", MessageType.TRADE_REJECTED, tradeId);
             return toDTO(trade);
         }
 
@@ -182,7 +182,7 @@ public class TradeService {
 
         String offers = String.join(", ", finalCounterpartItems);
         String wants = String.join(", ", trade.getProposerItems());
-        String content = counterpartName + " aceitou a troca! Dará: " + offers + " | Quer receber: " + wants + ". Confirmas?";
+        String content = counterpartName + " accepted the trade! Will give: " + offers + " | Wants to receive: " + wants + ". Confirm?";
         messageService.sendInternal(counterpartId, proposerId, content, MessageType.TRADE_RESPONSE, tradeId);
 
         return toDTO(trade);
@@ -203,12 +203,12 @@ public class TradeService {
     @Transactional
     public TradeProposalDTO confirm(Long tradeId, Long proposerId, boolean accept) {
         TradeProposal trade = tradeProposalRepository.findById(tradeId)
-                .orElseThrow(() -> new RuntimeException("Troca não encontrada"));
+                .orElseThrow(() -> new RuntimeException("Trade not found"));
         if (!trade.getProposer().getId().equals(proposerId)) {
-            throw new IllegalArgumentException("Sem permissão");
+            throw new IllegalArgumentException("Not authorised");
         }
         if (trade.getStatus() != TradeStatus.PENDING_PROPOSER) {
-            throw new IllegalArgumentException("Troca não está à espera de confirmação");
+            throw new IllegalArgumentException("Trade is not awaiting confirmation");
         }
 
         Long counterpartId = trade.getCounterpart().getId();
@@ -218,7 +218,7 @@ public class TradeService {
             trade.setStatus(TradeStatus.REJECTED);
             tradeProposalRepository.save(trade);
             messageService.sendInternal(proposerId, counterpartId,
-                    proposerName + " cancelou a troca.", MessageType.TRADE_REJECTED, tradeId);
+                    proposerName + " cancelled the trade.", MessageType.TRADE_REJECTED, tradeId);
             return toDTO(trade);
         }
 
@@ -227,8 +227,8 @@ public class TradeService {
 
         String proposerOffers = String.join(", ", trade.getProposerItems());
         String counterpartOffers = String.join(", ", trade.getCounterpartItems());
-        String content = "Troca confirmada! " + proposerName + " dará " + proposerOffers
-                + " e receberá " + counterpartOffers + ". Fica pendente ate ser efectuada em mao.";
+        String content = "Trade confirmed! " + proposerName + " will give " + proposerOffers
+                + " and receive " + counterpartOffers + ". Pending until completed in person.";
         messageService.sendInternal(proposerId, counterpartId, content, MessageType.TRADE_CONFIRMED, tradeId);
 
         return toDTO(trade);
@@ -247,12 +247,12 @@ public class TradeService {
     @Transactional
     public TradeProposalDTO complete(Long tradeId, Long userId) {
         TradeProposal trade = tradeProposalRepository.findById(tradeId)
-                .orElseThrow(() -> new RuntimeException("Troca não encontrada"));
+                .orElseThrow(() -> new RuntimeException("Trade not found"));
 
         boolean isProposer = trade.getProposer().getId().equals(userId);
         boolean isCounterpart = trade.getCounterpart().getId().equals(userId);
-        if (!isProposer && !isCounterpart) throw new IllegalArgumentException("Sem permissão");
-        if (trade.getStatus() != TradeStatus.CONFIRMED) throw new IllegalArgumentException("Troca não está confirmada");
+        if (!isProposer && !isCounterpart) throw new IllegalArgumentException("Not authorised");
+        if (trade.getStatus() != TradeStatus.CONFIRMED) throw new IllegalArgumentException("Trade is not confirmed");
 
         User proposer = userService.getById(trade.getProposer().getId());
         User counterpart = userService.getById(trade.getCounterpart().getId());
@@ -278,9 +278,9 @@ public class TradeService {
      */
     public TradeProposalDTO getTrade(Long tradeId, Long userId) {
         TradeProposal trade = tradeProposalRepository.findById(tradeId)
-                .orElseThrow(() -> new RuntimeException("Troca não encontrada"));
+                .orElseThrow(() -> new RuntimeException("Trade not found"));
         boolean isParticipant = trade.getProposer().getId().equals(userId) || trade.getCounterpart().getId().equals(userId);
-        if (!isParticipant) throw new IllegalArgumentException("Sem permissão");
+        if (!isParticipant) throw new IllegalArgumentException("Not authorised");
         return toDTO(trade);
     }
 
@@ -309,7 +309,7 @@ public class TradeService {
      */
     private void transferDuplicate(User giver, User receiver, String code) {
         var giverDup = userDuplicateRepository.findByUserAndSticker_Code(giver, code)
-                .orElseThrow(() -> new IllegalStateException(giver.getDisplayName() + " não tem " + code + " duplicado"));
+                .orElseThrow(() -> new IllegalStateException(giver.getDisplayName() + " does not have " + code + " as a duplicate"));
 
         if (giverDup.getQuantity() > 1) {
             giverDup.setQuantity(giverDup.getQuantity() - 1);

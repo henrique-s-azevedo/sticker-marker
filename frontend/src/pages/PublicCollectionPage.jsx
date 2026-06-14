@@ -67,16 +67,16 @@ export default function PublicCollectionPage() {
           style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '4px 12px', color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)', cursor: 'pointer' }}
           onClick={() => navigate(-1)}
         >
-          ← Voltar
+          ← Back
         </button>
         <h1 className="collection-page__title">@{userTag} · WC 2026</h1>
         <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', padding: '4px 8px', border: '1px solid var(--color-border)', borderRadius: '999px' }}>
-          Só leitura
+          Read only
         </span>
       </header>
 
       <main className="collection-page__main">
-        {loading && <p className="collection-page__status">A carregar...</p>}
+        {loading && <p className="collection-page__status">Loading...</p>}
         {error   && <p className="collection-page__status collection-page__status--error">{error}</p>}
 
         {!loading && !error && (
@@ -101,7 +101,7 @@ export default function PublicCollectionPage() {
                 />
               ))}
               {sortedSections.length === 0 && (
-                <p className="collection-page__empty">Nenhum cromo nesta aba.</p>
+                <p className="collection-page__empty">No stickers in this tab.</p>
               )}
             </div>
           </>

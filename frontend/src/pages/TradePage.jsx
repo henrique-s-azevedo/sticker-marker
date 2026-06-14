@@ -70,7 +70,7 @@ export default function TradePage() {
     }
   }
 
-  if (loading) return <div className="trade-page__status">A carregar...</div>;
+  if (loading) return <div className="trade-page__status">Loading...</div>;
   if (error) return <div className="trade-page__status trade-page__status--error">{error}</div>;
   if (!calc) return null;
 
@@ -79,26 +79,26 @@ export default function TradePage() {
       <header className="trade-page__header">
         <button className="trade-page__back" onClick={() => navigate(`/chat/${friendId}`)}>←</button>
         <div>
-          <h1 className="trade-page__title">Troca com {calc.friendDisplayName}</h1>
-          <p className="trade-page__subtitle">Máx. {calc.maxTrades} troca{calc.maxTrades !== 1 ? 's' : ''} possíve{calc.maxTrades !== 1 ? 'is' : 'l'}</p>
+          <h1 className="trade-page__title">Trade with {calc.friendDisplayName}</h1>
+          <p className="trade-page__subtitle">Max. {calc.maxTrades} possible trade{calc.maxTrades !== 1 ? 's' : ''}</p>
         </div>
       </header>
 
       <div className="trade-page__counter">
         <span className={`trade-page__count ${!balanced ? 'trade-page__count--warn' : 'trade-page__count--ok'}`}>
-          Queres receber: {wantCount} | Vais oferecer: {offerCount}
-          {!balanced && wantCount + offerCount > 0 ? ' — devem ser iguais' : ''}
-          {overMax ? ` — máximo ${calc.maxTrades}` : ''}
+          Want to receive: {wantCount} | Offering: {offerCount}
+          {!balanced && wantCount + offerCount > 0 ? ' — must be equal' : ''}
+          {overMax ? ` — max ${calc.maxTrades}` : ''}
         </span>
       </div>
 
       <div className="trade-page__columns">
         <div className="trade-page__column">
           <h2 className="trade-page__col-title">
-            Podes receber <span className="trade-page__col-tag">repetidos de @{calc.friendUserTag}</span>
+            You can receive <span className="trade-page__col-tag">duplicates from @{calc.friendUserTag}</span>
           </h2>
           {calc.friendOfferings.length === 0
-            ? <p className="trade-page__empty">Sem repetidos que precises</p>
+            ? <p className="trade-page__empty">No duplicates you need</p>
             : calc.friendOfferings.map(s => (
               <StickerRow
                 key={s.code}
@@ -112,10 +112,10 @@ export default function TradePage() {
 
         <div className="trade-page__column">
           <h2 className="trade-page__col-title">
-            Podes oferecer <span className="trade-page__col-tag">os teus repetidos</span>
+            You can offer <span className="trade-page__col-tag">your duplicates</span>
           </h2>
           {calc.myOfferings.length === 0
-            ? <p className="trade-page__empty">Sem repetidos que o amigo precise</p>
+            ? <p className="trade-page__empty">No duplicates your friend needs</p>
             : calc.myOfferings.map(s => (
               <StickerRow
                 key={s.code}
@@ -136,10 +136,10 @@ export default function TradePage() {
           onClick={handlePropose}
           disabled={!balanced || overMax || sending}
         >
-          {sending ? 'A enviar...' : 'Propor troca'}
+          {sending ? 'Sending...' : 'Propose trade'}
         </button>
         <button className="trade-page__btn-cancel" onClick={() => navigate(`/chat/${friendId}`)}>
-          Cancelar
+          Cancel
         </button>
       </div>
     </div>

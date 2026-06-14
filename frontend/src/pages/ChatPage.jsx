@@ -14,14 +14,14 @@
  * message direction (mine vs. theirs) and button visibility.
  *
  * TradeMessageCard — shows action buttons based on tradeStatus and who sent the message:
- *   PENDING_COUNTERPART + not mine → "Ver e aceitar" + "Rejeitar"
- *   PENDING_PROPOSER   + not mine → "Confirmar troca" + "Cancelar"
- *   CONFIRMED                     → "Marcar como concluída" (transfers stickers)
+ *   PENDING_COUNTERPART + not mine → "View and accept" + "Reject"
+ *   PENDING_PROPOSER   + not mine → "Confirm trade" + "Cancel"
+ *   CONFIRMED                     → "Mark as completed" (transfers stickers)
  *
  * SellMessageCard — shows accept/reject buttons to the recipient of the proposal:
  *   SELL_PROPOSAL: recipient is the buyer (not the seller).
  *   BUY_PROPOSAL:  recipient is the seller (iAmSeller check).
- *   COMPLETED: shows an "Atualizar" button that navigates to /collection.
+ *   COMPLETED: shows an "Update collection" button that navigates to /collection.
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -101,10 +101,10 @@ export default function ChatPage() {
     const today = new Date();
     const isToday = d.toDateString() === today.toDateString();
     if (isToday) {
-      return d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+      return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     }
-    return d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' }) +
-      ' ' + d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }) +
+      ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   }
 
   return (
@@ -129,7 +129,7 @@ export default function ChatPage() {
       <div className="chat-page__messages">
         {error && <p className="chat-page__error">{error}</p>}
         {messages.length === 0 && !error && (
-          <p className="chat-page__empty">Ainda não há mensagens. Di olá!</p>
+          <p className="chat-page__empty">No messages yet. Say hello!</p>
         )}
         {messages.map(msg => {
           const mine = msg.senderId === myId;
@@ -181,7 +181,7 @@ export default function ChatPage() {
         <input
           className="chat-page__input"
           type="text"
-          placeholder="Escreve uma mensagem..."
+          placeholder="Write a message..."
           value={text}
           onChange={e => setText(e.target.value)}
           maxLength={1000}
@@ -192,7 +192,7 @@ export default function ChatPage() {
           type="submit"
           disabled={!text.trim() || sending}
         >
-          Enviar
+          Send
         </button>
       </form>
     </div>
@@ -208,7 +208,7 @@ function SellMessageCard({ msg, mine, myId, friend, formatTime, onRefresh, navig
   const sellStatus = msg.sellProposalStatus;
   const isSellProposal = msg.messageType === 'SELL_PROPOSAL';
   const iAmSeller = myId === msg.sellProposalSellerId;
-  const friendName = friend?.displayName ?? 'o outro utilizador';
+  const friendName = friend?.displayName ?? 'the other user';
 
   // While pending: only the RECIPIENT of the proposal sees the action buttons
   // SELL_PROPOSAL → receiver is the buyer (not the seller)
@@ -217,8 +217,8 @@ function SellMessageCard({ msg, mine, myId, friend, formatTime, onRefresh, navig
     (isSellProposal && !iAmSeller) ||
     (!isSellProposal && iAmSeller)
   );
-  const acceptLabel = isSellProposal ? 'Aceitar a compra' : 'Aceitar a venda';
-  const rejectLabel = isSellProposal ? 'Rejeitar a compra' : 'Rejeitar a venda';
+  const acceptLabel = isSellProposal ? 'Accept purchase' : 'Accept sale';
+  const rejectLabel = isSellProposal ? 'Reject purchase' : 'Reject sale';
 
   async function act(fn) {
     setActing(true);
@@ -241,12 +241,12 @@ function SellMessageCard({ msg, mine, myId, friend, formatTime, onRefresh, navig
     let message;
     if (mine) {
       message = isSellProposal
-        ? `O "${friendName}" aceitou a tua venda.\nQuando completares a venda em mão e tiveres os cromos clica no botão para atualizar automaticamente a tua coleção:`
-        : `O "${friendName}" aceitou a tua compra.\nQuando completares a compra em mão e tiveres os cromos clica no botão para atualizar automaticamente a tua coleção:`;
+        ? `"${friendName}" accepted your sale.\nOnce you complete the exchange in person, click the button to automatically update your collection:`
+        : `"${friendName}" accepted your purchase.\nOnce you complete the exchange in person, click the button to automatically update your collection:`;
     } else {
       message = isSellProposal
-        ? `Aceitaste a proposta.\nQuando completares a compra em mão e tiveres os cromos clica no botão para atualizar automaticamente a tua coleção:`
-        : `Aceitaste a proposta.\nQuando completares a venda em mão e tiveres os cromos clica no botão para atualizar automaticamente a tua coleção:`;
+        ? `You accepted the proposal.\nOnce you complete the purchase in person, click the button to automatically update your collection:`
+        : `You accepted the proposal.\nOnce you complete the sale in person, click the button to automatically update your collection:`;
     }
     return (
       <div className={wrapClass}>
@@ -257,7 +257,7 @@ function SellMessageCard({ msg, mine, myId, friend, formatTime, onRefresh, navig
               className="chat-page__trade-btn chat-page__trade-btn--complete"
               onClick={() => { setDismissed(true); navigate('/collection'); }}
             >
-              Atualizar
+              Update collection
             </button>
           </div>
         </div>
@@ -270,7 +270,7 @@ function SellMessageCard({ msg, mine, myId, friend, formatTime, onRefresh, navig
       <div className={wrapClass}>
         <div className="chat-page__trade-card chat-page__trade-card--rejected">
           <p className="chat-page__trade-content">
-            {isSellProposal ? 'Venda rejeitada' : 'Compra rejeitada'}
+            {isSellProposal ? 'Sale rejected' : 'Purchase rejected'}
           </p>
           <div className="chat-page__trade-actions">
             <button
@@ -297,14 +297,14 @@ function SellMessageCard({ msg, mine, myId, friend, formatTime, onRefresh, navig
               disabled={acting}
               onClick={() => act(() => completeSell(sellId))}
             >
-              {acting ? 'A processar...' : acceptLabel}
+              {acting ? 'Processing...' : acceptLabel}
             </button>
             <button
               className="chat-page__trade-btn chat-page__trade-btn--danger"
               disabled={acting}
               onClick={() => act(() => cancelSell(sellId))}
             >
-              {acting ? 'A processar...' : rejectLabel}
+              {acting ? 'Processing...' : rejectLabel}
             </button>
           </div>
         )}
@@ -358,14 +358,14 @@ function TradeMessageCard({ msg, mine, myId, formatTime, navigate, onRefresh }) 
               disabled={acting}
               onClick={() => navigate(`/trade-respond/${tradeId}`)}
             >
-              Ver e aceitar
+              View and accept
             </button>
             <button
               className="chat-page__trade-btn chat-page__trade-btn--danger"
               disabled={acting}
               onClick={() => act(() => respondTrade(tradeId, false, []))}
             >
-              Rejeitar
+              Reject
             </button>
           </div>
         )}
@@ -377,14 +377,14 @@ function TradeMessageCard({ msg, mine, myId, formatTime, navigate, onRefresh }) 
               disabled={acting}
               onClick={() => act(() => confirmTrade(tradeId, true))}
             >
-              Confirmar troca
+              Confirm trade
             </button>
             <button
               className="chat-page__trade-btn chat-page__trade-btn--danger"
               disabled={acting}
               onClick={() => act(() => confirmTrade(tradeId, false))}
             >
-              Cancelar
+              Cancel
             </button>
           </div>
         )}
@@ -396,7 +396,7 @@ function TradeMessageCard({ msg, mine, myId, formatTime, navigate, onRefresh }) 
               disabled={acting}
               onClick={() => act(() => completeTrade(tradeId))}
             >
-              {acting ? 'A aplicar...' : 'Marcar como concluída'}
+              {acting ? 'Applying...' : 'Mark as completed'}
             </button>
           </div>
         )}

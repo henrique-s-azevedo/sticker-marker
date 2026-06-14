@@ -17,8 +17,8 @@ import { getMyInvite } from '../../services/profileService';
 import './AddFriendModal.css';
 
 const MODES = [
-  { id: 'email', label: 'Por Email' },
-  { id: 'tag',   label: 'Por Tag' },
+  { id: 'email', label: 'By Email' },
+  { id: 'tag',   label: 'By Tag' },
   { id: 'qr',    label: 'QR Code' },
 ];
 
@@ -48,7 +48,7 @@ export default function AddFriendModal({ onClose, onSuccess }) {
       } else {
         await addFriendByTag(value.trim());
       }
-      setSuccess('Pedido enviado!');
+      setSuccess('Request sent!');
       setValue('');
       onSuccess?.();
     } catch (err) {
@@ -68,8 +68,8 @@ export default function AddFriendModal({ onClose, onSuccess }) {
   return (
     <div className="add-friend-modal__overlay" onClick={onClose}>
       <div className="add-friend-modal" onClick={e => e.stopPropagation()}>
-        <button className="add-friend-modal__close" onClick={onClose} aria-label="Fechar">✕</button>
-        <h2 className="add-friend-modal__title">Adicionar Amigo</h2>
+        <button className="add-friend-modal__close" onClick={onClose} aria-label="Close">✕</button>
+        <h2 className="add-friend-modal__title">Add Friend</h2>
 
         <div className="add-friend-modal__modes">
           {MODES.map(m => (
@@ -88,14 +88,14 @@ export default function AddFriendModal({ onClose, onSuccess }) {
             <input
               className="add-friend-modal__input"
               type={mode === 'email' ? 'email' : 'text'}
-              placeholder={mode === 'email' ? 'email@exemplo.com' : '@usertag'}
+              placeholder={mode === 'email' ? 'email@example.com' : '@usertag'}
               value={value}
               onChange={e => setValue(e.target.value)}
               required
               autoFocus
             />
             <button className="add-friend-modal__submit" type="submit" disabled={loading || !value.trim()}>
-              {loading ? 'A enviar...' : 'Enviar pedido'}
+              {loading ? 'Sending...' : 'Send request'}
             </button>
           </form>
         )}
@@ -111,17 +111,17 @@ export default function AddFriendModal({ onClose, onSuccess }) {
                   fgColor="#ffffff"
                 />
                 <p className="add-friend-modal__qr-hint">
-                  Outro utilizador lê este QR e envia-te um pedido de amizade.
+                  Another user scans this QR and sends you a friend request.
                 </p>
                 <div className="add-friend-modal__qr-link">
                   <span className="add-friend-modal__qr-url">{invite.inviteUrl}</span>
                   <button className="add-friend-modal__copy-btn" onClick={copyLink}>
-                    {copied ? 'Copiado!' : 'Copiar'}
+                    {copied ? 'Copied!' : 'Copy'}
                   </button>
                 </div>
               </>
             ) : (
-              !error && <p className="add-friend-modal__loading">A gerar QR code...</p>
+              !error && <p className="add-friend-modal__loading">Generating QR code...</p>
             )}
           </div>
         )}

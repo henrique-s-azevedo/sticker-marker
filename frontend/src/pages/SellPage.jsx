@@ -58,7 +58,7 @@ export default function SellPage() {
     if (selected.size === 0) return;
     const parsedPrice = parseFloat(price);
     if (isNaN(parsedPrice) || parsedPrice < 0) {
-      setError('Indica um preço válido (pode ser 0)');
+      setError('Enter a valid price (0 is allowed)');
       return;
     }
     setError('');
@@ -92,7 +92,7 @@ export default function SellPage() {
   const availableStickers = calc?.availableStickers.filter(s => !usedCodes.has(s.code)) ?? [];
   const total = batches.reduce((sum, b) => sum + b.pricePerUnit * b.stickerCodes.length, 0);
 
-  if (loading) return <div className="sell-page__status">A carregar...</div>;
+  if (loading) return <div className="sell-page__status">Loading...</div>;
   if (error && !calc) return <div className="sell-page__status sell-page__status--error">{error}</div>;
 
   return (
@@ -101,12 +101,12 @@ export default function SellPage() {
         <button className="sell-page__back" onClick={() => navigate(`/chat/${friendId}`)}>←</button>
         <div>
           <h1 className="sell-page__title">
-            {isSell ? `Vender para ${calc?.friendDisplayName}` : `Comprar de ${calc?.friendDisplayName}`}
+            {isSell ? `Sell to ${calc?.friendDisplayName}` : `Buy from ${calc?.friendDisplayName}`}
           </h1>
           <p className="sell-page__subtitle">
             {isSell
-              ? `Os teus repetidos que @${calc?.friendUserTag} precisa`
-              : `Repetidos de @${calc?.friendUserTag} que precisas`}
+              ? `Your duplicates that @${calc?.friendUserTag} needs`
+              : `@${calc?.friendUserTag}'s duplicates you need`}
           </p>
         </div>
       </header>
@@ -115,7 +115,7 @@ export default function SellPage() {
         {/* Price + confirm */}
         <div className="sell-page__controls">
           <div className="sell-page__price-row">
-            <label className="sell-page__price-label">Preço por cromo:</label>
+            <label className="sell-page__price-label">Price per sticker:</label>
             <input
               className="sell-page__price-input"
               type="number"
@@ -132,7 +132,7 @@ export default function SellPage() {
             onClick={confirmBatch}
             disabled={selected.size === 0}
           >
-            Confirmar seleção ({selected.size} cromo{selected.size !== 1 ? 's' : ''})
+            Confirm selection ({selected.size} sticker{selected.size !== 1 ? 's' : ''})
           </button>
           {error && <p className="sell-page__error">{error}</p>}
         </div>
@@ -140,15 +140,15 @@ export default function SellPage() {
         {/* Sticker list */}
         <div className="sell-page__stickers">
           <h2 className="sell-page__section-title">
-            Disponíveis ({availableStickers.length})
+            Available ({availableStickers.length})
           </h2>
           {availableStickers.length === 0 ? (
             <p className="sell-page__empty">
               {calc?.availableStickers.length === 0
                 ? (isSell
-                    ? 'Não tens repetidos que este amigo precise.'
-                    : 'Este amigo não tem repetidos que precises.')
-                : 'Todos os cromos já estão em grupos confirmados.'}
+                    ? 'You have no duplicates this friend needs.'
+                    : 'This friend has no duplicates you need.')
+                : 'All stickers are already in confirmed groups.'}
             </p>
           ) : (
             <div className="sell-page__sticker-list">
@@ -171,7 +171,7 @@ export default function SellPage() {
         {/* Confirmed batches */}
         {batches.length > 0 && (
           <div className="sell-page__batches">
-            <h2 className="sell-page__section-title">Lista de venda</h2>
+            <h2 className="sell-page__section-title">Sale list</h2>
             {batches.map((batch, i) => {
               const batchTotal = (batch.pricePerUnit * batch.stickerCodes.length).toFixed(2);
               return (
@@ -179,7 +179,7 @@ export default function SellPage() {
                   <div className="sell-page__batch-info">
                     <span className="sell-page__batch-codes">{batch.stickerCodes.join(', ')}</span>
                     <span className="sell-page__batch-price">
-                      {batchTotal}€ ({batch.pricePerUnit.toFixed(2)}€ cada)
+                      {batchTotal}€ ({batch.pricePerUnit.toFixed(2)}€ each)
                     </span>
                   </div>
                   <button className="sell-page__batch-remove" onClick={() => removeBatch(i)}>×</button>
@@ -199,10 +199,10 @@ export default function SellPage() {
           onClick={handleFinalize}
           disabled={batches.length === 0 || sending}
         >
-          {sending ? 'A enviar...' : (isSell ? 'Finalizar pedido de venda' : 'Finalizar pedido de compra')}
+          {sending ? 'Sending...' : (isSell ? 'Finalise sale proposal' : 'Finalise purchase proposal')}
         </button>
         <button className="sell-page__btn-cancel" onClick={() => navigate(`/chat/${friendId}`)}>
-          Cancelar
+          Cancel
         </button>
       </div>
     </div>

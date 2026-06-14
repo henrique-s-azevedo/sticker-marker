@@ -87,7 +87,7 @@ public class PublicCollectionController {
      */
     private User resolveAndCheckAccess(String userTag, Authentication auth) {
         User target = userRepository.findByUserTag(userTag)
-                .orElseThrow(() -> new RuntimeException("Utilizador não encontrado"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Long viewerId = (Long) auth.getDetails();
 
@@ -96,11 +96,11 @@ public class PublicCollectionController {
 
         CollectionVisibility vis = target.getCollectionVisibility();
         if (vis == CollectionVisibility.PRIVATE) {
-            throw new IllegalArgumentException("Coleção privada");
+            throw new IllegalArgumentException("Collection is private");
         }
         if (vis == CollectionVisibility.FRIENDS_ONLY) {
             if (!friendshipService.areFriends(viewerId, target.getId())) {
-                throw new IllegalArgumentException("Apenas amigos podem ver esta coleção");
+                throw new IllegalArgumentException("Only friends can view this collection");
             }
         }
         return target;

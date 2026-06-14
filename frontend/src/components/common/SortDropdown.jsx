@@ -10,11 +10,11 @@ import { useState, useRef, useEffect } from 'react';
 import './SortDropdown.css';
 
 const OPTIONS = [
-  { key: 'ALBUM', label: 'Caderneta' },
+  { key: 'ALBUM', label: 'Album order' },
   { key: 'AZ', label: 'A → Z' },
   { key: 'ZA', label: 'Z → A' },
-  { key: 'MOST_COMPLETE', label: 'Mais completas' },
-  { key: 'LEAST_COMPLETE', label: 'Menos completas' },
+  { key: 'MOST_COMPLETE', label: 'Most complete' },
+  { key: 'LEAST_COMPLETE', label: 'Least complete' },
 ];
 
 export default function SortDropdown({ value, onChange }) {
@@ -54,7 +54,7 @@ export default function SortDropdown({ value, onChange }) {
       </button>
 
       {open && (
-        <ul className="sort-dropdown__menu" role="listbox" aria-label="Ordenação">
+        <ul className="sort-dropdown__menu" role="listbox" aria-label="Sort order">
           {OPTIONS.map(opt => (
             <li
               key={opt.key}

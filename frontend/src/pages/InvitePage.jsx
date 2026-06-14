@@ -36,10 +36,10 @@ export default function InvitePage() {
       .then(async res => {
         if (!res.ok) {
           const d = await res.json().catch(() => ({}));
-          throw new Error(d.message ?? 'Erro ao aceitar convite');
+          throw new Error(d.message ?? 'Error accepting invite');
         }
         setStatus('success');
-        setMessage('Pedido de amizade enviado!');
+        setMessage('Friend request sent!');
         setTimeout(() => navigate('/profile'), 2000);
       })
       .catch(e => {
@@ -50,18 +50,18 @@ export default function InvitePage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px', color: 'var(--color-text)' }}>
-      {status === 'loading' && <p>A processar convite...</p>}
+      {status === 'loading' && <p>Processing invite...</p>}
       {status === 'success' && (
         <>
           <p style={{ color: 'var(--color-stat-owned)', fontSize: '18px', fontWeight: 700 }}>✓ {message}</p>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '13px' }}>A redirecionar para o teu perfil...</p>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '13px' }}>Redirecting to your profile...</p>
         </>
       )}
       {status === 'error' && (
         <>
           <p style={{ color: 'var(--color-stat-missing)', fontSize: '16px' }}>{message}</p>
           <button onClick={() => navigate('/collection')} style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '8px 16px', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
-            Ir para a coleção
+            Go to collection
           </button>
         </>
       )}

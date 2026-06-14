@@ -18,7 +18,7 @@
  * AddFriendModal handles friend requests by email, tag, or QR code.
  *
  * UserSearchRow (local component) — search result with an inline "Add friend" button
- * that optimistically updates to "Pedido enviado" after the request is sent.
+ * that optimistically updates to "Request sent" after the request is sent.
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -38,9 +38,9 @@ import AddFriendModal from '../components/profile/AddFriendModal';
 import './ProfilePage.css';
 
 const VISIBILITY_LABELS = {
-  PUBLIC:       'Pública',
-  FRIENDS_ONLY: 'Só amigos',
-  PRIVATE:      'Privada',
+  PUBLIC:       'Public',
+  FRIENDS_ONLY: 'Friends only',
+  PRIVATE:      'Private',
 };
 
 export default function ProfilePage() {
@@ -160,11 +160,11 @@ export default function ProfilePage() {
     <div className="profile-page">
       <header className="profile-page__header">
         <button className="profile-page__back" onClick={() => navigate('/collection')}>
-          ← Voltar
+          ← Back
         </button>
-        <h1 className="profile-page__title">Perfil</h1>
+        <h1 className="profile-page__title">Profile</h1>
         <button className="profile-page__logout" onClick={() => { logout(); navigate('/login'); }}>
-          Sair
+          Sign out
         </button>
       </header>
 
@@ -180,10 +180,10 @@ export default function ProfilePage() {
 
       <nav className="profile-page__tabs">
         {[
-          { id: 'profile',  label: 'Perfil' },
-          { id: 'friends',  label: `Amigos${friends.length ? ` (${friends.length})` : ''}` },
-          { id: 'requests', label: `Pedidos${profile?.pendingRequestsCount > 0 ? ` · ${profile.pendingRequestsCount}` : ''}` },
-          { id: 'messages', label: `Mensagens${conversations.some(c => c.unreadCount > 0) ? ` · ${conversations.reduce((s, c) => s + c.unreadCount, 0)}` : ''}` },
+          { id: 'profile',  label: 'Profile' },
+          { id: 'friends',  label: `Friends${friends.length ? ` (${friends.length})` : ''}` },
+          { id: 'requests', label: `Requests${profile?.pendingRequestsCount > 0 ? ` · ${profile.pendingRequestsCount}` : ''}` },
+          { id: 'messages', label: `Messages${conversations.some(c => c.unreadCount > 0) ? ` · ${conversations.reduce((s, c) => s + c.unreadCount, 0)}` : ''}` },
         ].map(t => (
           <button
             key={t.id}
@@ -201,9 +201,9 @@ export default function ProfilePage() {
         {tab === 'profile' && profile && (
           <div className="profile-page__section">
             <div className="profile-page__card">
-              <h2 className="profile-page__card-title">Informação</h2>
+              <h2 className="profile-page__card-title">Information</h2>
               <div className="profile-page__info-row">
-                <span className="profile-page__info-label">Nome</span>
+                <span className="profile-page__info-label">Name</span>
                 <span className="profile-page__info-value">{profile.displayName}</span>
               </div>
               <div className="profile-page__info-row">
@@ -217,8 +217,8 @@ export default function ProfilePage() {
             </div>
 
             <div className="profile-page__card">
-              <h2 className="profile-page__card-title">Visibilidade da Coleção</h2>
-              <p className="profile-page__card-desc">Quem pode ver a tua coleção</p>
+              <h2 className="profile-page__card-title">Collection Visibility</h2>
+              <p className="profile-page__card-desc">Who can see your collection</p>
               <div className="profile-page__vis-options">
                 {Object.entries(VISIBILITY_LABELS).map(([key, label]) => (
                   <button
@@ -313,16 +313,16 @@ export default function ProfilePage() {
             <input
               className="profile-page__search"
               type="text"
-              placeholder="Filtrar amigos..."
+              placeholder="Filter friends..."
               value={friendsFilterQ}
               onChange={e => setFriendsFilterQ(e.target.value)}
             />
 
             <div className="profile-page__card">
-              <h3 className="profile-page__card-title">Os teus amigos ({filteredFriends.length})</h3>
+              <h3 className="profile-page__card-title">Your friends ({filteredFriends.length})</h3>
               {filteredFriends.length === 0
                 ? <p className="profile-page__empty">
-                    {friendsFilterQ ? 'Nenhum amigo encontrado.' : 'Ainda não tens amigos adicionados.'}
+                    {friendsFilterQ ? 'No friends found.' : 'No friends added yet.'}
                   </p>
                 : filteredFriends.map(f => (
                   <div key={f.id} className="profile-page__friend-row">
@@ -336,27 +336,27 @@ export default function ProfilePage() {
                         className="profile-page__btn-secondary"
                         onClick={() => navigate(`/chat/${f.id}`)}
                       >
-                        Mensagem
+                        Message
                       </button>
                       <button
                         className="profile-page__btn-secondary"
                         onClick={() => setTradeModalFriend(f)}
                       >
-                        Ver trocas
+                        View trades
                       </button>
                       {f.collectionVisibility !== 'PRIVATE' && (
                         <button
                           className="profile-page__btn-secondary"
                           onClick={() => navigate(`/collection/${f.userTag}`)}
                         >
-                          Ver coleção
+                          View collection
                         </button>
                       )}
                       <button
                         className="profile-page__btn-danger"
                         onClick={() => handleRemoveFriend(f.id)}
                       >
-                        Remover
+                        Remove
                       </button>
                     </div>
                   </div>
@@ -372,20 +372,20 @@ export default function ProfilePage() {
               <input
                 className="profile-page__search"
                 type="text"
-                placeholder="Pesquisar utilizadores (@tag ou nome)..."
+                placeholder="Search users (@tag or name)..."
                 value={searchQ}
                 onChange={handleSearch}
               />
               <button className="profile-page__btn-primary" onClick={() => setShowAddModal(true)}>
-                + Adicionar Amigo
+                + Add Friend
               </button>
             </div>
 
             {searchQ.trim().length >= 2 && (
               <div className="profile-page__card">
-                <h3 className="profile-page__card-title">Resultados</h3>
+                <h3 className="profile-page__card-title">Results</h3>
                 {searchResults.length === 0
-                  ? <p className="profile-page__empty">Nenhum utilizador encontrado.</p>
+                  ? <p className="profile-page__empty">No users found.</p>
                   : searchResults.map(u => (
                     <UserSearchRow key={u.id} user={u} onRequestSent={loadRequests} />
                   ))
@@ -394,9 +394,9 @@ export default function ProfilePage() {
             )}
 
             <div className="profile-page__card">
-              <h3 className="profile-page__card-title">Pedidos recebidos ({requests.length})</h3>
+              <h3 className="profile-page__card-title">Received requests ({requests.length})</h3>
               {requests.length === 0
-                ? <p className="profile-page__empty">Nenhum pedido pendente.</p>
+                ? <p className="profile-page__empty">No pending requests.</p>
                 : requests.map(r => (
                   <div key={r.id} className="profile-page__request-row">
                     <div className="profile-page__friend-avatar">{r.requesterDisplayName?.[0]?.toUpperCase()}</div>
@@ -405,8 +405,8 @@ export default function ProfilePage() {
                       <span className="profile-page__friend-tag">@{r.requesterUserTag}</span>
                     </div>
                     <div className="profile-page__friend-actions">
-                      <button className="profile-page__btn-primary" onClick={() => handleAccept(r.id)}>Aceitar</button>
-                      <button className="profile-page__btn-danger"  onClick={() => handleReject(r.id)}>Rejeitar</button>
+                      <button className="profile-page__btn-primary" onClick={() => handleAccept(r.id)}>Accept</button>
+                      <button className="profile-page__btn-danger"  onClick={() => handleReject(r.id)}>Reject</button>
                     </div>
                   </div>
                 ))
@@ -414,9 +414,9 @@ export default function ProfilePage() {
             </div>
 
             <div className="profile-page__card">
-              <h3 className="profile-page__card-title">Pedidos enviados ({sentReqs.length})</h3>
+              <h3 className="profile-page__card-title">Sent requests ({sentReqs.length})</h3>
               {sentReqs.length === 0
-                ? <p className="profile-page__empty">Nenhum pedido enviado.</p>
+                ? <p className="profile-page__empty">No requests sent.</p>
                 : sentReqs.map(r => (
                   <div key={r.id} className="profile-page__request-row">
                     <div className="profile-page__friend-avatar">{r.addresseeDisplayName?.[0]?.toUpperCase()}</div>
@@ -424,7 +424,7 @@ export default function ProfilePage() {
                       <span className="profile-page__friend-name">{r.addresseeDisplayName}</span>
                       <span className="profile-page__friend-tag">@{r.addresseeUserTag}</span>
                     </div>
-                    <span className="profile-page__pending-badge">Pendente</span>
+                    <span className="profile-page__pending-badge">Pending</span>
                   </div>
                 ))
               }
@@ -437,15 +437,15 @@ export default function ProfilePage() {
             <input
               className="profile-page__search"
               type="text"
-              placeholder="Filtrar conversas..."
+              placeholder="Filter conversations..."
               value={msgsFilterQ}
               onChange={e => setMsgsFilterQ(e.target.value)}
             />
             <div className="profile-page__card">
-              <h3 className="profile-page__card-title">Conversas</h3>
+              <h3 className="profile-page__card-title">Conversations</h3>
               {filteredConversations.length === 0
                 ? <p className="profile-page__empty">
-                    {msgsFilterQ ? 'Nenhuma conversa encontrada.' : 'Ainda não há mensagens. Abre o chat de um amigo.'}
+                    {msgsFilterQ ? 'No conversations found.' : "No messages yet. Open a friend's chat."}
                   </p>
                 : filteredConversations.map(c => (
                   <div
@@ -488,7 +488,7 @@ export default function ProfilePage() {
   );
 }
 
-/** Search result row with an inline "Add friend" button. Optimistically updates to "Pedido enviado". */
+/** Search result row with an inline "Add friend" button. Optimistically updates to "Request sent". */
 function UserSearchRow({ user, onRequestSent }) {
   const [status, setStatus] = useState(user.friendshipStatus ?? null);
   const [loading, setLoading] = useState(false);
@@ -511,12 +511,12 @@ function UserSearchRow({ user, onRequestSent }) {
         <span className="profile-page__friend-tag">@{user.userTag}</span>
       </div>
       {status === 'ACCEPTED'
-        ? <span className="profile-page__already-friends">Amigos</span>
+        ? <span className="profile-page__already-friends">Friends</span>
         : status === 'PENDING'
-          ? <span className="profile-page__pending-badge">Pedido enviado</span>
+          ? <span className="profile-page__pending-badge">Request sent</span>
           : (
             <button className="profile-page__btn-secondary" onClick={send} disabled={loading}>
-              {loading ? '...' : '+ Adicionar'}
+              {loading ? '...' : '+ Add'}
             </button>
           )
       }

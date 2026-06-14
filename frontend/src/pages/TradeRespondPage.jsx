@@ -72,7 +72,7 @@ export default function TradeRespondPage() {
     }
   }
 
-  if (loading) return <div className="trade-page__status">A carregar...</div>;
+  if (loading) return <div className="trade-page__status">Loading...</div>;
   if (error && !trade) return <div className="trade-page__status trade-page__status--error">{error}</div>;
   if (!trade) return null;
 
@@ -86,21 +86,21 @@ export default function TradeRespondPage() {
       <header className="trade-page__header">
         <button className="trade-page__back" onClick={() => navigate(`/chat/${trade.proposerId}`)}>←</button>
         <div>
-          <h1 className="trade-page__title">Proposta de troca</h1>
+          <h1 className="trade-page__title">Trade proposal</h1>
           <p className="trade-page__subtitle">de @{trade.proposerUserTag}</p>
         </div>
       </header>
 
       <div className="trade-page__counter">
         <span className={`trade-page__count ${valid ? 'trade-page__count--ok' : 'trade-page__count--warn'}`}>
-          Precisas de selecionar {requiredCount} cromo{requiredCount !== 1 ? 's' : ''} para dar · selecionados: {offerCount}
+          Select {requiredCount} sticker{requiredCount !== 1 ? 's' : ''} to give · selected: {offerCount}
         </span>
       </div>
 
       <div className="trade-page__columns">
         <div className="trade-page__column">
           <h2 className="trade-page__col-title">
-            Receberás de @{trade.proposerUserTag}
+            You will receive from @{trade.proposerUserTag}
           </h2>
           {trade.proposerItems.map(s => (
             <div key={s.code} className="trade-page__sticker" style={{ cursor: 'default' }}>
@@ -114,8 +114,8 @@ export default function TradeRespondPage() {
 
         <div className="trade-page__column">
           <h2 className="trade-page__col-title">
-            Darás a @{trade.proposerUserTag}
-            <span className="trade-page__col-tag">seleciona {requiredCount}</span>
+            You will give to @{trade.proposerUserTag}
+            <span className="trade-page__col-tag">select {requiredCount}</span>
           </h2>
           {availableOfferings.length === 0 && trade.counterpartItems.map(s => (
             <button
@@ -152,14 +152,14 @@ export default function TradeRespondPage() {
           onClick={() => handleRespond(true)}
           disabled={!valid || sending}
         >
-          {sending ? 'A enviar...' : 'Aceitar troca'}
+          {sending ? 'Sending...' : 'Accept trade'}
         </button>
         <button
           className="trade-page__btn-cancel"
           onClick={() => handleRespond(false)}
           disabled={sending}
         >
-          Rejeitar
+          Reject
         </button>
       </div>
     </div>

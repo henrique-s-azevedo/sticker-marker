@@ -41,7 +41,7 @@ public class FriendshipService {
      */
     public FriendRequestDTO sendRequestByEmail(Long requesterId, AddFriendByEmailDTO dto) {
         User addressee = userRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Utilizador não encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
         return sendRequest(requesterId, addressee.getId());
     }
 
@@ -57,7 +57,7 @@ public class FriendshipService {
     public FriendRequestDTO sendRequestByTag(Long requesterId, AddFriendByTagDTO dto) {
         String tag = dto.getUserTag().startsWith("@") ? dto.getUserTag().substring(1) : dto.getUserTag();
         User addressee = userRepository.findByUserTag(tag)
-                .orElseThrow(() -> new IllegalArgumentException("Utilizador não encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
         return sendRequest(requesterId, addressee.getId());
     }
 
@@ -72,14 +72,14 @@ public class FriendshipService {
      */
     public FriendRequestDTO sendRequest(Long requesterId, Long addresseeId) {
         if (requesterId.equals(addresseeId)) {
-            throw new IllegalArgumentException("Não podes adicionar-te a ti mesmo");
+            throw new IllegalArgumentException("You cannot add yourself");
         }
         User requester = userService.getById(requesterId);
         User addressee = userService.getById(addresseeId);
 
         friendshipRepository.findBetweenUsers(requesterId, addresseeId).ifPresent(f -> {
-            if (f.getStatus() == FriendshipStatus.ACCEPTED) throw new IllegalArgumentException("Já são amigos");
-            if (f.getStatus() == FriendshipStatus.PENDING) throw new IllegalArgumentException("Pedido já enviado");
+            if (f.getStatus() == FriendshipStatus.ACCEPTED) throw new IllegalArgumentException("Already friends");
+            if (f.getStatus() == FriendshipStatus.PENDING) throw new IllegalArgumentException("Request already sent");
         });
 
         Friendship f = new Friendship();

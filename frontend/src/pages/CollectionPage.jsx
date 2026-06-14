@@ -186,8 +186,7 @@ export default function CollectionPage() {
         patchSticker(code, { status: 'DUPLICATE', duplicateQuantity: dupQty });
       }
       refreshProgress();
-    } catch (err) {
-      console.error('Erro ao guardar cromo:', err);
+    } catch {
     }
   }, [patchSticker, refreshProgress]);
 
@@ -205,8 +204,8 @@ export default function CollectionPage() {
           <button
             className="collection-page__profile-btn"
             onClick={() => navigate('/profile', { state: { tab: 'messages' } })}
-            title="Mensagens"
-            aria-label="Mensagens"
+            title="Messages"
+            aria-label="Messages"
           >
             <ChatIcon />
             {unreadMessages > 0 && (
@@ -216,8 +215,8 @@ export default function CollectionPage() {
           <button
             className="collection-page__profile-btn"
             onClick={() => navigate('/profile')}
-            title="Perfil"
-            aria-label="Perfil"
+            title="Profile"
+            aria-label="Profile"
           >
             <ProfileIcon />
             {pendingCount > 0 && (
@@ -225,13 +224,13 @@ export default function CollectionPage() {
             )}
           </button>
           <button className="collection-page__logout" onClick={handleLogout}>
-            Sair
+            Sign out
           </button>
         </div>
       </header>
 
       <main className="collection-page__main">
-        {loading && <p className="collection-page__status">A carregar...</p>}
+        {loading && <p className="collection-page__status">Loading...</p>}
         {error && <p className="collection-page__status collection-page__status--error">{error}</p>}
 
         {!loading && !error && (
@@ -255,7 +254,7 @@ export default function CollectionPage() {
                     options={countryOptions}
                     value={null}
                     onChange={handleCountrySelect}
-                    placeholder="Filtrar por país..."
+                    placeholder="Filter by country..."
                   />
                 </div>
                 {selectedCountries.length > 0 && (
@@ -263,7 +262,7 @@ export default function CollectionPage() {
                     className="collection-page__reset"
                     onClick={() => setSelectedCountries([])}
                   >
-                    Limpar filtros
+                    Clear filters
                   </button>
                 )}
                 <div className="collection-page__share-icons">
@@ -282,16 +281,16 @@ export default function CollectionPage() {
                   <button
                     className="collection-page__share-btn collection-page__share-btn--whatsapp"
                     onClick={() => setShareMode('whatsapp')}
-                    title="Partilhar no WhatsApp"
-                    aria-label="Partilhar no WhatsApp"
+                    title="Share on WhatsApp"
+                    aria-label="Share on WhatsApp"
                   >
                     <WhatsAppIcon />
                   </button>
                   <button
                     className="collection-page__share-btn"
                     onClick={() => setShareMode('general')}
-                    title="Partilhar"
-                    aria-label="Partilhar"
+                    title="Share"
+                    aria-label="Share"
                   >
                     <ShareIcon />
                   </button>
@@ -308,7 +307,7 @@ export default function CollectionPage() {
                         <button
                           className="collection-page__tag-remove"
                           onClick={() => handleCountryRemove(v)}
-                          aria-label={`Remover ${label}`}
+                          aria-label={`Remove ${label}`}
                         >
                           ✕
                         </button>
@@ -331,7 +330,7 @@ export default function CollectionPage() {
                 />
               ))}
               {sortedSections.length === 0 && (
-                <p className="collection-page__empty">Nenhum cromo nesta aba.</p>
+                <p className="collection-page__empty">No stickers in this tab.</p>
               )}
             </div>
           </>

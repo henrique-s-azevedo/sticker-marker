@@ -19,7 +19,7 @@ export default function GoogleSignInButton({ onError, locale = 'en' }) {
 
     function init() {
       if (initialized.current || !containerRef.current) return;
-      const width = containerRef.current.offsetWidth || 300;
+      const width = 300;
       initialized.current = true;
 
       window.google.accounts.id.initialize({
@@ -52,5 +52,5 @@ export default function GoogleSignInButton({ onError, locale = 'en' }) {
     }
   }, []);
 
-  return <div ref={containerRef} style={{ flex: 1, minWidth: 0 }} />;
+  return <div ref={containerRef} style={{ display: 'flex', justifyContent: 'center' }} />;
 }
